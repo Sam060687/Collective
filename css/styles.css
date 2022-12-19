@@ -1,5 +1,5 @@
 body {
-    margin: 0;
+    margin: 0 !important;
     background-color: #868686;
 }
 
@@ -7,12 +7,12 @@ body {
     background-color: hsl(0, 0%, 48%);
     display: grid;
     height: 100vh;
-    grid-template-columns: 0.25fr 1fr;
-    grid-template-rows: 0.2fr 2fr 0.2fr ;
+    grid-template-columns: 0.25fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 0.2fr 2fr 0.15fr ;
     grid-template-areas:
-    "sidebarHeader chatHeader"
-    "sidebarChats chatWindow"
-    "sidebarActionsBar chatActionsBar"
+    "sidebarHeader sidebarHeader chatHeader chatHeader chatHeader chatHeader"
+    "sidebarChats sidebarChats chatWindow chatWindow chatWindow chatWindow"
+    "sidebarActionsBar sidebarActionsBar chatActionsBar chatActionsBar chatActionsBar chatActionsBar"
 }
 
 
@@ -28,12 +28,12 @@ body {
     grid-area: sidebarChats;
     overflow: hidden;
     position: relative;
-    width: 100%;
+    /* width: 100%; */
 
 }
 
 #sidebarActionsBar{
-    background-color: #ff0202;
+    background-color: #454646;
     grid-area: sidebarActionsBar;
 
 }
@@ -50,11 +50,94 @@ body {
 
 }
 
+/* Chat Action Bar */
+
 #chatActionsBar{
     background-color: #268f65;
     grid-area: chatActionsBar;
+}
+
+#chatActionsWrapper{
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr 0.15fr 0.15fr 0.15fr;
+    grid-template-rows: 1fr;
+    grid-template-areas:
+    "chatActionsBarInput chatActionsBarEmotes chatActionsBarAttach chatActionsBarSend";
+}
+
+
+#chatActionsBarInput{
+    background-color: #da6a0e;
+    grid-area: chatActionsBarInput;
+    float: left;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    padding: 1%;
 
 }
+
+#chatActionsBarEmotes{
+    background-color: #1ec13c;
+    grid-area: chatActionsBarEmotes;
+    float: right;
+    text-align: center;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    padding: 1%;
+
+}
+
+#chatActionsBarAttach{
+    background-color: #169ecf;
+    grid-area: chatActionsBarAttach;
+    float: right;
+    text-align: center;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    padding: 1%;
+}
+
+#chatActionsBarSend{
+    background-color: #717071;
+    grid-area: chatActionsBarSend;
+    float: right;
+    text-align: center;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    padding: 1%;
+
+}
+
+#txtChatBox{
+    height: 80%;
+    /* font-size:14pt; */
+    width: 100%;
+
+}
+
+#btnEmotes{
+    margin: 10px;
+    height: 70%;
+    width: 70%;
+}
+
+#btnAttach{
+    margin: 10px;
+    height: 70%;
+    width: 70%;
+}
+#btnSend{
+    margin: 10px;
+    height: 70%;
+    width: 70%;
+}
+
+
 
 .chatList{
     /* background-color: hsl(185, 84%, 52%); */
@@ -94,7 +177,7 @@ body {
 @media only screen and (max-width: 550px) {
     .container{
         grid-template-columns: 1fr;
-        grid-template-rows: minmax(1fr, 1fr) minmax(2fr, 2fr) 1fr 1fr 1fr 1fr 0.5fr ;
+        grid-template-rows: 0.5fr 0.5fr 4fr 0.5fr 1fr 0fr;
         grid-template-areas:
         "sidebarHeader "
         "chatHeader"
