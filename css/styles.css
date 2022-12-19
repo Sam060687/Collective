@@ -1,0 +1,52 @@
+body {
+    margin: 0;
+    background-color: #868686;
+}
+
+.container{
+    background-color: hsl(0, 0%, 48%);
+    display: grid;
+    height: 100vh;
+    grid-template-columns: 0.25fr 1fr;
+    grid-template-rows: 0.2fr 2fr 0.2fr ;
+    grid-template-areas:
+    "sidebarHeader chatHeader"
+    "sidebarChats chatWindow"
+    "sidebarActionsBar chatActionsBar"
+}
+
+#sidebarHeader{
+    background-color: #26658f;
+    grid-area: sidebarHeader;
+
+}
+
+#sidebarChats{
+    background-color: #454646;
+    grid-area: sidebarChats;
+
+}
+
+#sidebarActionsBar{
+    background-color: #ff0202;
+    grid-area: sidebarActionsBar;
+
+}
+
+#chatHeader{
+    background-color: #85a51b;
+    grid-area: chatHeader;
+
+}
+
+#chatWindow{
+    background-color: #8c268f;
+    grid-area: chatWindow;
+
+}
+
+#chatActionsBar{
+    background-color: #268f65;
+    grid-area: chatActionsBar;
+
+}
