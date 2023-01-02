@@ -2,7 +2,7 @@ GET http://localhost:3000/users
 
 ###
 
-GET http://localhost:3000/users/63b2f4e9483e8b9fe1cfac36
+GET http://localhost:3000/users/63b2f0200b8d2600aee0437b
 
 ###
 
@@ -10,20 +10,54 @@ POST http://localhost:3000/users
 Content-Type: application/json
 
 {
-    "username": "test222",
+    "username": "test22sdsd",
     "email": "test@test.com",
     "password": "test"
 }
 
 ###
 
-DELETE http://localhost:3000/users/63b2da8034594c9592984ea3
+DELETE http://localhost:3000/users/63b304278864e8b826e0235a
 
 ###
 
-PATCH http://localhost:3000/users/63b2f0200b8d2600aee0437c
+PATCH http://localhost:3000/users/63b304278864e8b826e0235a
 Content-Type: application/json
 
 {
-    "password": "test222dsfdfsdg22"
+    "password": "asdasd"
+}
+
+###
+
+GET http://localhost:3000/messages
+
+###
+
+GET http://localhost:3000/messages/63b30152ec512ae3cf6b292f
+
+###
+
+POST http://localhost:3000/messages
+Content-Type: application/json
+
+{
+    "chat_id": "test2asdasdasd22",
+    "message": "test message 1",
+    "date": "2021-09-01",
+    "time": "00:00:00.000",
+    "image": "test image"
+}
+
+###
+
+DELETE http://localhost:3000/messages/63b2da8034594c9592984ea3
+
+###
+
+PATCH http://localhost:3000/messages/63b2d7ef34594c9592984e9c
+Content-Type: application/json
+
+{
+    "message": "wfewfwefewfwef"
 }
