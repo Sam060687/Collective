@@ -14,6 +14,12 @@ app.use(express.json());
 const usersRouter = require('./routes/users.js');
 app.use('/', usersRouter);
 
+const messagesRouter = require('./routes/messages.js');
+app.use('/', messagesRouter);
+
+const chatsRouter = require('./routes/chats.js');
+app.use('/', chatsRouter);
+
 
 app.listen(3000, () => {
   console.log('Server is running on port 3000');
