@@ -1,0 +1,14 @@
+{
+    "id": "01",
+    "name": "Test Chat Room",
+    "members": [   
+        {
+            "userId": "01"
+        },
+        {
+            "userId": "02"
+        }
+    ]
+ }
+
+ //db.chats.insertOne({id: "01", name: "Test Chat Room", members: [{userId: "01"},{userId: "02"}]})

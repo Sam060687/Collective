@@ -1,0 +1,9 @@
+{
+   "id": "01",
+   "email": "sam@sam.com",
+   "password": "test",
+   "displayName": "Sam Davies"
+
+}
+
+//db.users.insertOne({email: "john@john.com", password: "test", displayName: "John Smith"})
