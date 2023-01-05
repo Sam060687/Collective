@@ -28,6 +28,7 @@ body {
     grid-area: sidebarChats;
     overflow: hidden;
     position: relative;
+    padding: 5%;
     /* width: 100%; */
 
 }
@@ -79,7 +80,7 @@ body {
 }
 
 #chatActionsBarEmotes{
-    background-color: #1ec13c;
+    background-color: #da6a0e;
     grid-area: chatActionsBarEmotes;
     float: right;
     text-align: center;
@@ -91,7 +92,7 @@ body {
 }
 
 #chatActionsBarAttach{
-    background-color: #169ecf;
+    background-color: #da6a0e;
     grid-area: chatActionsBarAttach;
     float: right;
     text-align: center;
@@ -102,7 +103,7 @@ body {
 }
 
 #chatActionsBarSend{
-    background-color: #717071;
+    background-color: #da6a0e;
     grid-area: chatActionsBarSend;
     float: right;
     text-align: center;
@@ -146,6 +147,7 @@ body {
     background:green;
     height: 10%;
     width: 100%;
+    /* padding: 5%; */
 
     /* height: 100%; */
     grid-template-columns: 0.5fr 1fr;
@@ -158,6 +160,8 @@ body {
 .chatImage{
     background-color: #268f65;
     grid-area: chatImage;
+    min-width: 50px;
+    min-height: 50px;
 
 }
 
@@ -185,5 +189,10 @@ body {
         "chatActionsBar"
         "sidebarActionsBar"
         "sidebarChats";
+    }
+
+    #chatList{
+        display: block;
+        visibility: hidden;
     }
 }
