@@ -1,0 +1,68 @@
+.chatWindow{
+
+    max-height: 300px;
+    max-width: 90%;
+    width: 100%;
+    display: inline-block;
+    padding: 4px;
+    border: 1px solid rgb(26, 97, 97);
+    overflow: scroll;
+    overflow-x: hidden;
+}
+
+.messageContainer{
+    
+    width: 100%;
+    display: inline-block;
+    
+    
+}
+#message{
+    width: 80%;
+}
+#send{
+    width: 10%;;
+}
+
+#chatList{
+    min-height: 400px;
+    max-width: 90%;
+    width: 100%;
+    display: inline-block;
+    padding: 4px;
+    border: 1px solid rgb(26, 97, 97);
+    overflow: scroll;
+    overflow-x: hidden;
+}
+.chatContainer{
+
+    width: 100%;
+    display: inline-block;
+    background-color: rgb(26, 97, 97);
+    margin: 3px;
+    border-radius: 5px;
+    
+}
+
+.chat{
+    color: azure;
+padding: 3px;
+
+}
+.sent{
+width: fit-content;
+float: right;
+background-color: rgb(26, 97, 97);
+border-radius: 5px;
+padding: 10px;
+
+}
+
+.received{
+    width: fit-content;
+    float: left;
+    background-color: rgb(26, 97, 97);
+    border-radius: 5px;
+    padding: 10px;
+
+}

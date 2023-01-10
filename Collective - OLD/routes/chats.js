@@ -78,7 +78,4 @@ async function getMessage(req, res, next) {
     next();
 }
 
-//Create one chat
-
-
 module.exports = router

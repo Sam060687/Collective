@@ -44,14 +44,15 @@ GET http://localhost:3000/messages/63b30152ec512ae3cf6b292f
 
 ###
 
-POST http://localhost:3000/chats
+POST http://localhost:3000/messages
 Content-Type: application/json
 
 {
-    "id": "2",
-    "name": "Test Chat Room 2",
-    "members": ["sam"]
-
+    "chat_id": "test2asdasdasd22",
+    "message": "test message 1",
+    "date": "2021-09-01",
+    "time": "00:00:00.000",
+    "image": "test image"
 }
 
 ###
