@@ -104,7 +104,7 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
     initialize(
         passport,
         email => users.findOne({email: email}), //(user => user.email === email),
-        id => users.findOneAndDelete({id: id}) //(user => user.id === id
+        id => users.findOne({id: id}) //(user => user.id === id
       )
       //console.log(initializePassport)
 
