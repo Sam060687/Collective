@@ -78,6 +78,7 @@ $(function() {
                     //$('#chatWindow').append('<div class="messageContainer"><div class="message"><div class="received">' + msg[x].sender+": " + msg[x].message +  '</div></div></div>');
                 //}
             }
+            
         //}
     
         
@@ -96,6 +97,7 @@ $(function() {
         console.log(msg);
         $('#message').val('')
         socket.emit('sendMessage', msg);
+        $('#chatWindow').scrollTop = $('#chatWindow').scrollHeight - $('#chatWindow').clientHeight
     })
 
 
