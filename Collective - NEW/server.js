@@ -11,13 +11,13 @@ const server = require("http").createServer(app);
 
 //Login handler modules
 const LocalStrategy = require('passport-local').Strategy
-const User = require('./models/Users');
-const auth = require('./routes/auth.js');
+//const User = require('./models/Users');
+//const auth = require('./routes/auth.js');
 const flash = require('express-flash');
 const session = require('express-session');
 const passport = require('passport');
 const bcrypt = require('bcrypt');
-const initializePassport  = require('./passportConfig');
+//const initializePassport  = require('./passportConfig');
 
 
 
@@ -31,23 +31,19 @@ const io = require('socket.io')(server, {
         transports: ['websocket', 'polling'],
         credentials: true
     },
-    // allowEIO3: true
 });
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({extended: false}));
 app.use(flash())
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: 'secretSquirrel',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: true
 }));
 app.use(passport.initialize());
 app.use(passport.session());
-//app.use("/api/auth", auth);
-
-
-
+app.use(express.static(__dirname + '/public'));
 
 //Connect to MongoDB
 mongodb.connect('mongodb://localhost:27017', (err, db) => {
@@ -56,21 +52,13 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
     let dbo = db.db('collective')
     let chats = dbo.collection('chats');
     let users = dbo.collection('users');
-    //let user2 = getUserByEmail('sam@ttt.com')
-    //console.log(user2.username)
-    // let users2 = users.find({}).toArray(function(err, result) {
-    //     if (err) throw err;
-    //     console.log(result);
-    // })
 
     function initialize(passport) {
         const authenticateUser = async (email, password, done) => {
           const user = await getUserByEmail(email)
-          //console.log(user)
-          //console.log(email)
           
           if (user == null) {
-            return done(null, false, { message: 'No user with that email' })
+            return done(null, false, { message: 'Account not found' })
           }
           console.log(user.password)
           try {
@@ -86,13 +74,6 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         }
       
         passport.use(new LocalStrategy({ usernameField: 'email' }, authenticateUser))
-        // passport.serializeUser(function(user, done) {
-        //     done(null, user);
-        //   });
-          
-        //   passport.deserializeUser(function(user, done) {
-        //     done(null, user);
-        //   });
         passport.serializeUser((user, done) => done(null, user._id))
         passport.deserializeUser((_id, done) => {
           return done(null, getUserById(_id))
@@ -103,14 +84,15 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
 
     initialize(
         passport,
-        email => users.findOne({email: email}), //(user => user.email === email),
-        id => users.findOne({id: id}) //(user => user.id === id
+        email => users.findOne({email: email}),
+        id => users.findOne({id: id})
       )
-      //console.log(initializePassport)
 
 
-    app.get('/', checkAuthenticated, (req, res) => {
-        res.render("index", {name: 'Sam'})
+
+    app.get('/', checkAuthenticated,  (req, res) => {
+        res.render("index", {name: req.body.username})
+        
         });
 
     app.get('/login', checkNotAuthenticated, (req, res) => {
@@ -119,11 +101,12 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
 
 
 
-    app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
-        successRedirect: '/',
-        failureRedirect: '/login',
-        failureFlash: true
-    }));
+    app.post('/login',
+     checkNotAuthenticated,
+      passport.authenticate('local', {failureRedirect: '/login', failureFlash: true}),
+      function(req, res) {
+        res.render("index", {name: req.user.name})
+    });
 
 
     app.get('/register', checkNotAuthenticated, (req, res) => {
@@ -144,15 +127,10 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         }
     });
 
-    //     app.get('/logout', function(req, res, next){
-    // req.logout(function(err) {
-    //     if (err) { return next(err); }
-    //     res.redirect('/');
-    // });
-    // });
     app.get("/logout", (req, res) => {
         req.logout(req.user, err => {
           if(err) return next(err);
+          
           res.redirect("/login");
         });
       });
@@ -175,6 +153,7 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
 
     //Socket.io connection
     io.on('connection', (socket) => {
+        //console.log('Connected to Socket.io, socket id: ' + req.body.email);
         let messages = dbo.collection('messages');
             try{
                 console.log('Connected to Socket.io, socket id: ' + socket.id);

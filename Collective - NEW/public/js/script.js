@@ -12,22 +12,22 @@ $(function() {
 
 
     //Get elements
-    let element = function(id){
-        return $('#' + id);
-    }
+    // let element = function(id){
+    //     return $('#' + id);
+    // }
 
-    let status = element.status
-    let send = element.send
-    let message = element.message
-    let chatWindow = element.chatWindow
-    let chatList = element.chatList
-    let chatName = element.chatName
+    // let status = element.status
+    // let send = element.send
+    // let message = element.message
+    // let chatWindow = element.chatWindow
+    // let chatList = element.chatList
+    // let chatName = element.chatName
 
-    let cElement = function(objClass){
-        return$('.' + objClass);
-    }
+    // let cElement = function(objClass){
+    //     return$('.' + objClass);
+    // }
 
-    let chat = cElement.chat
+    // let chat = cElement.chat
 
 
     //Connect to socket.io
