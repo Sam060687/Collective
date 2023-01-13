@@ -109,28 +109,28 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
       //console.log(initializePassport)
 
 
-    app.get('/', (req, res) => {
+    app.get('/', checkAuthenticated, (req, res) => {
         res.render("index", {name: 'Sam'})
         });
 
-    app.get('/login', (req, res) => {
+    app.get('/login', checkNotAuthenticated, (req, res) => {
         res.render("login", {message: 'Please enter your email and password'})
         });
 
 
 
-    app.post('/login', passport.authenticate('local', {
+    app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
         successRedirect: '/',
         failureRedirect: '/login',
         failureFlash: true
     }));
 
 
-    app.get('/register', (req, res) => {
+    app.get('/register', checkNotAuthenticated, (req, res) => {
     res.render("register.ejs")
     });
 
-    app.post('/register', async (req, res) => {
+    app.post('/register', checkNotAuthenticated, async (req, res) => {
        try{
             const hashedPassword = await bcrypt.hash(req.body.password, 10)
             console.log( hashedPassword)
@@ -144,10 +144,18 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         }
     });
 
-    app.delete('/logout', (req, res) => {
-        req.logOut()
-        res.redirect('/login')
-      })
+    //     app.get('/logout', function(req, res, next){
+    // req.logout(function(err) {
+    //     if (err) { return next(err); }
+    //     res.redirect('/');
+    // });
+    // });
+    app.get("/logout", (req, res) => {
+        req.logout(req.user, err => {
+          if(err) return next(err);
+          res.redirect("/login");
+        });
+      });
       
       function checkAuthenticated(req, res, next) {
         if (req.isAuthenticated()) {

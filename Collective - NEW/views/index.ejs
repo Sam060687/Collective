@@ -1,2 +1,4 @@
 <h1>Hi <%= name %></h1>
-<input type="button" value="Logout" onclick="window.location.href='/logout'">
+<form action="/logout" method="GET">
+    <button type="submit">Logout</button>
+</form>
