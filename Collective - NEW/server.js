@@ -7,6 +7,12 @@ const mongodb = require('mongodb').MongoClient;
 const express = require('express');
 const app = express();
 const server = require("http").createServer(app);
+const bodyParser = require('body-parser');
+var sessionstore = require('sessionstore');
+var ObjectId = require('mongodb').ObjectId;
+// const MongoDbStore = require('connect-mongo');
+
+// const mongoose = require('mongoose');
 //const router = express.Router();
 
 //Login handler modules
@@ -14,15 +20,13 @@ const LocalStrategy = require('passport-local').Strategy
 //const User = require('./models/Users');
 //const auth = require('./routes/auth.js');
 const flash = require('express-flash');
-const session = require('express-session');
+let session = require('express-session');
 const passport = require('passport');
+// const sharedsession = require("express-socket.io-session");
+// const passportSocketIo = require('passport.socketio');
+// const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 //const initializePassport  = require('./passportConfig');
-
-
-
-
-//Socket
 
 const io = require('socket.io')(server, {
     cors: {
@@ -33,6 +37,9 @@ const io = require('socket.io')(server, {
     },
 });
 
+
+
+
 app.set("view engine", "ejs");
 app.use(express.urlencoded({extended: false}));
 app.use(flash())
@@ -41,17 +48,33 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
+
+
+
+// io.use(sharedsession(session, {
+//     autoSave:true,
+//     secret: process.env.SESSION_SECRET,
+//     saveUninitialized: true,
+//     resave: false,
+
+// }));
+
+app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/views'));
 
 //Connect to MongoDB
 mongodb.connect('mongodb://localhost:27017', (err, db) => {
+
+
     if (err){ throw err;}
 
     let dbo = db.db('collective')
     let chats = dbo.collection('chats');
     let users = dbo.collection('users');
+    let sessions = dbo.collection('sessions');
 
     function initialize(passport) {
         const authenticateUser = async (email, password, done) => {
@@ -60,9 +83,10 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
           if (user == null) {
             return done(null, false, { message: 'Account not found' })
           }
-          console.log(user.password)
+          //console.log(user.password)
           try {
-              console.log(password, user.password)
+              //console.log(password, user.password)
+              sessions.insertOne({user: user, socketId: io.socket})
             if (await bcrypt.compare(password, user.password)) {
               return done(null, user)
             } else {
@@ -72,7 +96,7 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
             return done(e)
           }
         }
-      
+
         passport.use(new LocalStrategy({ usernameField: 'email' }, authenticateUser))
         passport.serializeUser((user, done) => done(null, user._id))
         passport.deserializeUser((_id, done) => {
@@ -88,14 +112,22 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         id => users.findOne({id: id})
       )
 
-
+    
 
     app.get('/', checkAuthenticated,  (req, res) => {
         res.render("index", {name: req.body.username})
-        
+
         });
 
-    app.get('/login', checkNotAuthenticated, (req, res) => {
+    app.get('/login', checkNotAuthenticated, (req, res, socket) => {
+        // let session1 = req.session;
+        // if(session1){
+        //     
+        // }
+        // else{
+           
+            console.log("No session", socket.id)
+        // }
         res.render("login", {message: 'Please enter your email and password'})
         });
 
@@ -106,6 +138,8 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
       passport.authenticate('local', {failureRedirect: '/login', failureFlash: true}),
       function(req, res) {
         res.render("index", {name: req.user.name})
+        saveUser(req)
+              
     });
 
 
@@ -116,7 +150,7 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
     app.post('/register', checkNotAuthenticated, async (req, res) => {
        try{
             const hashedPassword = await bcrypt.hash(req.body.password, 10)
-            console.log( hashedPassword)
+            //console.log( hashedPassword)
             users.insertOne({name: req.body.username, email: req.body.email, password: hashedPassword}, function(){
                 res.redirect('/login')
             })
@@ -126,6 +160,26 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
             console.log(err);
         }
     });
+
+    app.post('/message', checkNotAuthenticated,  (req, res) => {
+        try{
+             messages.insertOne({message: req.body.message, sender: req.body.user, time: req.body.time})
+             console.log( req)
+        }catch(err){
+            console.log(err);
+        }
+    });
+    app.get('/users', async (req, res) => {
+        //
+        try {
+            res.json(req.session.passport.user)
+            // let user = await getUsername(req.session.passport.user)
+            // res.json(user)
+        } catch (error) {
+            
+        }
+
+      })
 
     app.get("/logout", (req, res) => {
         req.logout(req.user, err => {
@@ -150,10 +204,25 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         next()
       }
 
+      function getUsername(id){
+        //var id2 = new ObjectId(id)
+       console.log(id)
+            users.find(ObjectId(id)).toArray(function(err, result) {
+                if (err) throw err;
+                
+                console.log(result[0])
+            return result[0]
+            });
+        }
+        
+      
+
 
     //Socket.io connection
-    io.on('connection', (socket) => {
-        //console.log('Connected to Socket.io, socket id: ' + req.body.email);
+
+    io.on('connection', function (socket) {
+
+        let chats = dbo.collection('chats');
         let messages = dbo.collection('messages');
             try{
                 console.log('Connected to Socket.io, socket id: ' + socket.id);
@@ -162,19 +231,22 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
                     if (err) throw err;
                     
                 socket.emit('receiveMessage', result)
-            });
+                });
+
+                chats.find({members: "sam"}).toArray(function(err, result) {
+                    if (err) throw err;
+
+                socket.emit('receiveChats', result)
+                });
             }catch(err){
                 console.log(err);
             }  
 
 
-    //Register
-
-
-    //Login
 
 
 
+            
     //Get chat list
 
 
@@ -189,14 +261,13 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
 
 
         //Send Messages
-        socket.on('sendMessage', (msg) => {
-
+        socket.on('sendMessage', (msg, req) => {
+            
             let sender = msg.sender;
             let chat_id = msg.chat_id;
             let message = msg.message;
             let date = msg.date;
             let time = msg.time;
-
             try{
                 messages.insertOne({sender: sender, chat_id: chat_id, message: message, date: date, time: time}, function(){
                     io.emit('receiveMessage', [msg])
@@ -232,7 +303,11 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         //let query = users.find({email : email})
         return result[0];
       }
-
+      function saveUser(req){
+        // passport.user = req.user;
+        // let session = req.session;
+        // console.log
+      }
       
     server.listen(3001, () => {
         console.log('Server is running on port 3001');
