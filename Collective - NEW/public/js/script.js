@@ -10,6 +10,14 @@ $(function() {
         }
     }
 
+    class Chat{
+        constructor(owner, name, members){
+            this.owner = owner;
+            this.name = name;
+            this.members = members;
+        }
+    }
+
 
     //Connect to socket.io
     
@@ -31,8 +39,16 @@ $(function() {
         } catch (error) {
             
         }
+        //socket.emit('receiveMessage')
+        socket.emit('loggedIn', await getUser())
 
+    
+
+    socket.on('receiveChats', async function(chat) {
+        console.log(chat)
+        $('#chatList').append('<div class="chatContainer"><div class="chat" id="' + chat.chatName + '">' + chat.chatName + '</div></div>');
     })
+
 
     $(document).on('click','.chat',function(){
         console.log('clicked', this.id)
@@ -43,10 +59,10 @@ $(function() {
         
         let user = await getUser();
         console.log(user)
-        //if (msg.length > 0){
+
             for(let x = 0; x < msg.length; x++){
-                //console.log(msg[x].sender)
-                if(msg[x].sender == user){
+
+                if(msg[x].sender == user.name){
                     $('#chatWindow').append('<div class="messageContainer"><div class="message"><div class="sent">' + msg[x].sender+": " + msg[x].message + '</div></div></div>');
                 }
                 else{
@@ -54,6 +70,7 @@ $(function() {
                 }
             }
     })
+})
 
     async function getChats(){
          try {
@@ -88,7 +105,7 @@ $(function() {
         let user = await getUser();
         //console.log(user)
         const msg = new Message
-        msg.sender = user;
+        msg.sender = user.name;
         msg.chat_id = 3;
         msg.message = $('#message').val();
         msg.date = 'test';
@@ -100,26 +117,95 @@ $(function() {
         socket.emit('sendMessage', msg);
         $('#chatWindow').scrollTop = $('#chatWindow').scrollHeight//- $('#chatWindow').clientHeight
     })
+    
+    $('#submitCreateChat').on('click', async function() {
 
+        let user = await getUser();
 
-    // <div class="messageContainer"><div class="received">received</div></div>
-    // <div class="messageContainer"><div class="sent">sent</div></div>
+        let newChat = new Chat
+        newChat.user = user
+        newChat.chatName = $('#chatName').val();
 
+        let chatFriendsList = [];
+        chatFriendsList.push(user.name)
+        $('input[type=checkbox]').each(function () {
+            if (this.checked){
+                chatFriendsList.push($(this).attr('id'))
+            }
+            //chatFriendsList += (chatFriendsList=="" ? sThisVal : "," + sThisVal);
+        });
+        newChat.members = chatFriendsList;
+        socket.emit('addChat', newChat);
+       
 
-    // //Switch Chat Rooms
-    // $('.chat').on('click', function() {
-    //     const chatName = $(this).val();
-    //     console.log(chatName);
-    //     //socket.emit('join', chatName);
-    // })
+    })
+
+    $('#submitAddFriend').on('click', async function() {
+        let user = await getUser();
+        let friend = $('#friend').val();
+        console.log(friend)
+        socket.emit('addFriend', user.name, friend);
+    })
 
 
     
+    //Modals
+
+// Get the modal
+var chatModal = document.getElementById("createChatModal");
+var friendModal = document.getElementById("addFriendModal");
 
 
-    
+// Get the button that opens the modal
+var chatBtn = document.getElementById("createChat");
+var friendBtn = document.getElementById("addFriend");
+
+// Get the <span> element that closes the modal
+var chatSpan = document.getElementsByClassName("close")[0];
+var friendSpan = document.getElementsByClassName("close")[1];
+
+// When the user clicks the button, open the modal 
+
+$('#createChat').on('click',  async function() {
+    $('#friendsList').empty();
+    chatModal.style.display = "block";
+
+    let user = await getUser();
+    console.log(user.friends)
+    for(let x = 0; x < user.friends.length; x++){
+        console.log(user.friends[x])
+       // $('#friendsList').append('<div class="messageContainer"><div class="message"><div class="received">' + user.friends[x] +": " + user.friends[x] +  '</div></div></div>');
+         $('#friendsList').append('<div class="fChecklist"><input type="checkbox" id="' + user.friends[x] + '" name="' + user.friends[x] + '"><label for="' + user.friends[x] + '">' + user.friends[x] + '</label><br></div>')
+
+    }
+})
+// chatBtn.onclick = async function() {
 
 
+// }
+friendBtn.onclick = async function() {
+    friendModal.style.display = "block";
 
+  }
 
-});
+// When the user clicks on <span> (x), close the modal
+chatSpan.onclick = function() {
+    chatModal.style.display = "none";
+}
+
+friendSpan.onclick = function() {
+    friendModal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == chatModal) {
+    chatModal.style.display = "none";
+
+  }
+  if (event.target == friendModal) {
+
+    friendModal.style.display = "none";
+  }
+}
+})

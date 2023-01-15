@@ -152,7 +152,7 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
        try{
             const hashedPassword = await bcrypt.hash(req.body.password, 10)
             //console.log( hashedPassword)
-            users.insertOne({name: req.body.username, email: req.body.email, password: hashedPassword}, function(){
+            users.insertOne({name: req.body.username, email: req.body.email, password: hashedPassword, friends: []}, function(){
                 res.redirect('/login')
             })
 
@@ -175,7 +175,7 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         try {
             users.find({"_id" : ObjectId(req.session.passport.user)}).toArray(function(err, result) {
                 if (err) throw err;
-                res.json(result[0].name)
+                res.json(result[0])
 
             })
         } catch (error) {
@@ -183,16 +183,40 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         }
 
     })
+    
+    // app.get('/friends', checkNotAuthenticated,  (req, res) => {
+    //     console.log("Friends")
+    //     // try {
+    //         users.find({"_id" : ObjectId(req.session.passport.user)},{friends}).toArray(function(err, result) {
+    //             if (err) throw err;
+    //             res.json(result)
+    //         })
+            
+    //      //} catch (error) {
+            
+    //     // }
+
+
+
+    //     // }catch(err){
+    //         // console.log(err);
+    //     // }
+    // });
 
 
 
       app.get("/chats", async (req, res) => {
+        try {
+            let usr = await users.find({"_id" : ObjectId(req.session.passport.user)}).toArray()
+            chats.find({members: usr[0].name}).toArray(function(err, result) {
+             if (err) throw err;
+             res.json(result)
+         });
+            
+        } catch (error) {
+            
+        }
 
-        let usr = await users.find({"_id" : ObjectId(req.session.passport.user)}).toArray()
-           chats.find({members: usr[0].name}).toArray(function(err, result) {
-            if (err) throw err;
-            res.json(result)
-        });
       });
 
     app.get("/logout", (req, res) => {
@@ -235,41 +259,39 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
 
     //Socket.io connection
 
-    io.on('connection', function (socket) {
+    io.on('connection', async function (socket) {
 
         let chats = dbo.collection('chats');
         let messages = dbo.collection('messages');
+        //let user = await getUser()
             try{
                 console.log('Connected to Socket.io, socket id: ' + socket.id);
 
                 messages.find({}).toArray(function(err, result) {
                     if (err) throw err;
+                
+                    //users.updateOne({"name" : user }, {$set: {socketId: socket.id}})
                     
                 //socket.emit('receiveMessage', result)
                 });
 
-                chats.find({members: "sam"}).toArray(function(err, result) {
-                    if (err) throw err;
+                // chats.find({members: "sam"}).toArray(function(err, result) {
+                //     if (err) throw err;
                     
-                io.to(socket.id).emit('receiveChats', result)
-                });
+                //io.to(socket.id).emit('receiveChats', result)
+                // });
             }catch(err){
                 console.log(err);
             }  
-
-
-
-
-
             
-    //Get chat list
-    socket.on('receiveChats', (userId) => {
-        
-        chats.find( { },{ members :{ $elemMatch :{name : userId} }}).toArray(function(err, result) {
-            if (err) throw err;
-        socket.emit('receiveChats', result)
-        });
-    });
+            //Get chat list
+            socket.on('receiveChats', (chat) => {
+                
+                // chats.find( { },{ members :{ $elemMatch :{name : userId} }}).toArray(function(err, result) {
+                //     if (err) throw err;
+                io.emit('receiveChats', [chat])
+                // });
+            });
 
     //Receive messages
     socket.on('receiveMessage', (msg) => {
@@ -279,6 +301,19 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         io.emit('receiveMessage', result)
         });
     });
+
+
+    socket.on('addFriend', async (user, friend) => {
+
+         users.updateOne({"name" : user}, {$push: {friends: friend}})
+        });
+
+    socket.on('addChat', async (chat) => {
+        chats.insertOne({owner: chat.user.name, name: chat.chatName, members: chat.members}, function(){
+            io.emit('receiveChats', [chat])
+        })            
+    });
+
 
 
         //Send Messages
@@ -317,6 +352,21 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         }
 
       }
+    //   async function getUser(req){
+
+    //     let user = ''
+
+    //     try {
+    //         // await app.get("/users", function(req, res){
+    //         //      user = req;
+    //         //   });
+    //         //   console.log(user)
+    //         user = req.session.passport.user
+    //           return user;
+              
+    //     } catch (error) { 
+    //         console.log(error);
+    //     }}
 
       async function getUserById(id){
         //console.log(id)
