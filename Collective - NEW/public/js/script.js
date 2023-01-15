@@ -56,11 +56,15 @@ $(function() {
     })
 
 
-    //Load messages
-    $(document).on('click','.chat',function(){
-        socket.emit('loadMessages', this.id)
+        
+        //Join Room
+    $(document).on('click','.chat', function(){
+        $('#chatWindow').empty();
+        socket.emit('joinRoom', this.id)
+        socket.emit('getMessages', this.id)
+            
     })
-  
+
 
     socket.on('receiveMessage', async function(msg) {
         
@@ -107,10 +111,7 @@ $(function() {
             console.log(error);
         }}
 
-        //Load chat
-        $(document).on('click','.chat',async function(){
-            console.log(this.id)
-        })
+
 
     //Send Message
     $('#send').on('click', async function() {
@@ -118,13 +119,13 @@ $(function() {
         //console.log(user)
         const msg = new Message
         msg.sender = user.name;
-        msg.chat_id = 3;
+        //msg.chat_id = 3;
         msg.message = $('#message').val();
         msg.date = 'test';
         msg.time = 'test';
         
         $('#message').val();
-        //console.log(msg);
+        console.log(msg);
         $('#message').val('')
         socket.emit('sendMessage', msg);
         $('#chatWindow').scrollTop = $('#chatWindow').scrollHeight//- $('#chatWindow').clientHeight

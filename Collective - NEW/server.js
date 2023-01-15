@@ -297,6 +297,22 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         
         });
 
+        //Join Chat
+        socket.on('joinRoom', function(room){
+            socket.leaveAll()
+            socket.join(room)
+
+            //console.log(socket.rooms)
+            })
+
+        //Get Messages
+        socket.on('getMessages', async (chat) => {
+            messages.find({chat: chat.name}).toArray(function(err, result) {
+                if (err) throw err;
+                io.emit('receiveMessage', result)
+            });
+        })
+
         //Join chat
         socket.on('loadMessages', async (chat) => {
             messages.find({chat: chat.name}).toArray(function(err, result) {
@@ -350,12 +366,14 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         socket.on('sendMessage', (msg, req) => {
             
             let sender = msg.sender;
-            let chat_id = msg.chat_id;
+            //let chat_id = msg.chat_id;
             let message = msg.message;
             let date = msg.date;
             let time = msg.time;
+            var room = Array.from(socket.rooms);
+            //console.log(room1[0])
             try{
-                messages.insertOne({sender: sender, chat_id: chat_id, message: message, date: date, time: time}, function(){
+                messages.insertOne({sender: sender, roomName: room[0], message: message, date: date, time: time}, function(){
                     io.emit('receiveMessage', [msg])
                 })            
              }
