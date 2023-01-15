@@ -56,22 +56,20 @@ $(function() {
     })
 
     async function getChats(){
-        // try {
+         try {
             let chats;
             await $.get("/chats", function(req, res){
                 //  chats = req;
                 chats = req   
-                console.log(req)
+                //console.log(req)
                 
               });
 
               return chats
-            }
-              //console.log(chats)
-              
-        // } catch (error) { 
-        //     console.log(error);
-        // }}
+
+        } catch (error) { 
+            console.log(error);
+        }}
 
     async function getUser(){
         let user = ''
@@ -79,7 +77,6 @@ $(function() {
         try {
             await $.get("/users", function(userid, status){
                  user = userid;
-                
               });
               return user;
         } catch (error) { 
