@@ -39,7 +39,7 @@ const io = require('socket.io')(server, {
 
 
 
-
+app.set("socketio", io);
 app.set("view engine", "ejs");
 app.use(express.urlencoded({extended: false}));
 app.use(flash())
@@ -181,6 +181,16 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
 
       })
 
+      app.get("/chats", (req, res) => {
+        
+        chats.find({members: "sam"}).toArray(function(err, result) {
+            if (err) throw err;
+            console.log(chats[0]);
+
+            res.json(result)
+        });
+      });
+
     app.get("/logout", (req, res) => {
         req.logout(req.user, err => {
           if(err) return next(err);
@@ -204,13 +214,14 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         next()
       }
 
+
       function getUsername(id){
         //var id2 = new ObjectId(id)
-       console.log(id)
+       //console.log(id)
             users.find(ObjectId(id)).toArray(function(err, result) {
                 if (err) throw err;
                 
-                console.log(result[0])
+                //console.log(result[0])
             return result[0]
             });
         }
@@ -230,13 +241,13 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
                 messages.find({}).toArray(function(err, result) {
                     if (err) throw err;
                     
-                socket.emit('receiveMessage', result)
+                //socket.emit('receiveMessage', result)
                 });
 
                 chats.find({members: "sam"}).toArray(function(err, result) {
                     if (err) throw err;
-
-                socket.emit('receiveChats', result)
+                    
+                io.to(socket.id).emit('receiveChats', result)
                 });
             }catch(err){
                 console.log(err);
@@ -248,7 +259,13 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
 
             
     //Get chat list
-
+    socket.on('receiveChats', (userId) => {
+        
+        chats.find( { },{ members :{ $elemMatch :{name : userId} }}).toArray(function(err, result) {
+            if (err) throw err;
+        socket.emit('receiveChats', result)
+        });
+    });
 
     //Receive messages
     socket.on('receiveMessage', (msg) => {
