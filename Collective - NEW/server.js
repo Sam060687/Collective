@@ -114,8 +114,9 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
 
     
 
-    app.get('/', checkAuthenticated,  (req, res) => {
-        res.render("index", {name: req.body.username})
+    app.get('/', checkAuthenticated, async (req, res) => {
+        let usr = await getUserById(req.session.passport.user)
+        res.render("index", {name: usr})
 
         });
 
@@ -136,7 +137,7 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
     app.post('/login',
      checkNotAuthenticated,
       passport.authenticate('local', {failureRedirect: '/login', failureFlash: true}),
-      function(req, res) {
+      function(req, res) {   
         res.render("index", {name: req.user.name})
         saveUser(req)
               
@@ -164,37 +165,32 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
     app.post('/message', checkNotAuthenticated,  (req, res) => {
         try{
              messages.insertOne({message: req.body.message, sender: req.body.user, time: req.body.time})
-             console.log( req)
+             //console.log( req)
         }catch(err){
             console.log(err);
         }
     });
     app.get('/users', async (req, res) => {
-        //
+        //let id = 
         try {
-            res.json(req.session.passport.user)
-            // let user = await getUsername(req.session.passport.user)
-            // res.json(user)
+            users.find({"_id" : ObjectId(req.session.passport.user)}).toArray(function(err, result) {
+                if (err) throw err;
+                res.json(result[0].name)
+
+            })
         } catch (error) {
             
         }
 
-      })
+    })
+
+
 
       app.get("/chats", async (req, res) => {
-        
-        // chats.find( { },{ members :{ $elemMatch :{name : "sam"} }}).toArray(function(err, result) {
-        //     if (err) throw err;
-        let usr = await users.find({"_id" : ObjectId(req.session.passport.user)}).toArray()
-        //let user = await getUserById(req.session.passport.user)
-        
-        //console.log(usr[0].email)
-        chats.find({members: usr[0].name}).toArray(function(err, result) {
-            if (err) throw err;
-            
-            //console.log(req.session.passport.user)
-           //console.log(result);
 
+        let usr = await users.find({"_id" : ObjectId(req.session.passport.user)}).toArray()
+           chats.find({members: usr[0].name}).toArray(function(err, result) {
+            if (err) throw err;
             res.json(result)
         });
       });
@@ -323,16 +319,17 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
       }
 
       async function getUserById(id){
-       // let result = await users.find({_id: id}).toArray();
-       let user;
+        //console.log(id)
        try {
-        let res = await users.find({"_id" : ObjectId(id)}).toArray(function(err, result) {
+        
+        users.find({"_id" : ObjectId(id)}).toArray(async function(err, result) {
             if (err) throw err;
-            user = result;
-            //console.log(result)
+            //console.log(result[0].name)
+            return result[0]
+
         })
-        return user
-       //return res[0];
+        //console.log(user)
+
        } catch (error) {
         
        }
