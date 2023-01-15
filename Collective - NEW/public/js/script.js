@@ -58,16 +58,28 @@ $(function() {
 
         
         //Join Room
-    $(document).on('click','.chat', function(){
-        $('#chatWindow').empty();
-        socket.emit('joinRoom', this.id)
-        socket.emit('getMessages', this.id)
+        $(document).on('click','.chat', function(){
+            $('#chatWindow').empty();
+            //console.log(this.id)
             
-    })
+            socket.emit('joinRoom', this.id)
+            //socket.emit('getMessages', this.id)
+                
+        })
+    // $(document).on('click','.chat', function(){
+    //     $('#chatWindow').empty();
+    //     socket.leave(socket.rooms)[1]
+    //     socket.join(this.id)
+    //     console.log(socket.rooms)
+        
+    //     socket.emit('joinRoom', this.id)
+    //     //socket.emit('getMessages', this.id)
+            
+    // })
 
 
     socket.on('receiveMessage', async function(msg) {
-        
+        console.log(msg)
         let user = await getUser();
         //console.log(user)
 
@@ -115,14 +127,18 @@ $(function() {
 
     //Send Message
     $('#send').on('click', async function() {
+
+
+
         let user = await getUser();
         //console.log(user)
         const msg = new Message
         msg.sender = user.name;
+        console.log(msg.sender)
         //msg.chat_id = 3;
         msg.message = $('#message').val();
-        msg.date = 'test';
-        msg.time = 'test';
+        msg.date = '3333333333';
+        msg.time = '3333333333';
         
         $('#message').val();
         console.log(msg);

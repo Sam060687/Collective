@@ -163,19 +163,19 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         }
     });
 
-    app.get('/message', checkNotAuthenticated,  (req, res) => {
-        try{
+    // app.get('/messages', checkNotAuthenticated,  (req, res) => {
+    //     try{
            
-            //  messages.find({chatName: req.query.chatName}).toArray(function(err, result) {
-            //     if (err) throw err;
-            //     res.json(result)
-            // })
+    //          messages.find({chatName: req.query.chatName}).toArray(function(err, result) {
+    //             if (err) throw err;
+    //             res.json(result)
+    //         })
              
-             //console.log( req)
-        }catch(err){
-            console.log(err);
-        }
-    });
+    //          //console.log( req)
+    //     }catch(err){
+    //         console.log(err);
+    //     }
+    // });
 
     app.get('/users', async (req, res) => {
         
@@ -280,13 +280,13 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
             });
 
     //Receive messages
-    socket.on('receiveMessage', (msg) => {
+    // socket.on('receiveMessage', (msg) => {
         
-        messages.find({}).toArray(function(err, result) {
-            if (err) throw err;            
-        io.emit('receiveMessage', result)
-        });
-    });
+    //     // messages.find({}).toArray(function(err, result) {
+    //     //     if (err) throw err;            
+    //     io.emit('receiveMessage', msg)
+    //     // });
+    // });
 
     socket.on('loggedIn', async (user, sid) => {
         try {
@@ -298,18 +298,28 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         });
 
         //Join Chat
-        socket.on('joinRoom', function(room){
-            socket.leaveAll()
+        socket.on('joinRoom', async function(room){
+            var rooms = await Array.from(socket.rooms);
+            socket.leave(rooms[1])
             socket.join(room)
+            //console.log(room)
+
+            messages.find({roomName: room}).toArray(function(err, result) {
+                if (err) throw err;
+                //console.log(result)
+                io.to(socket.id).emit('receiveMessage', result)
+            });
+            // io.to(socket.rooms[1]).emit('receiveMessage', messages)
+            //io.to(socket.id).emit('loadMessages')
 
             //console.log(socket.rooms)
             })
 
         //Get Messages
         socket.on('getMessages', async (chat) => {
-            messages.find({chat: chat.name}).toArray(function(err, result) {
+            messages.find({roomName: chat}).toArray(function(err, result) {
                 if (err) throw err;
-                io.emit('receiveMessage', result)
+                io.to(chat).emit('receiveMessage', result)
             });
         })
 
@@ -363,18 +373,19 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
     // });
 
         //Send Messages
-        socket.on('sendMessage', (msg, req) => {
-            
+        socket.on('sendMessage', async (msg, req) => {
+            // var room = await Array.from(socket.rooms);
+            // console.log(room[1])
             let sender = msg.sender;
             //let chat_id = msg.chat_id;
             let message = msg.message;
             let date = msg.date;
             let time = msg.time;
-            var room = Array.from(socket.rooms);
-            //console.log(room1[0])
+            var room = await Array.from(socket.rooms);
+            console.log("test", room[1])
             try{
-                messages.insertOne({sender: sender, roomName: room[0], message: message, date: date, time: time}, function(){
-                    io.emit('receiveMessage', [msg])
+                messages.insertOne({sender: sender, roomName: room[1], message: message, date: "today", time: time}, function(){
+                    io.to(room[1]).emit('receiveMessage', [msg])
                 })            
              }
             catch(err){
@@ -394,12 +405,31 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         }
     }
 
+        //Get Messages
+
+        // async function getMessages(chat){
+        //     try {
+        //         //console.log(chat)
+        //         await messages.find({roomName: chat}).toArray(function(err, result) {
+        //             if (err) throw err;
+        //             io.to(socket.rooms[1]).emit('receiveMessage', messages)
+        //             //io.to(socket.rooms[1]).emit('receiveMessage', result)
+        //             //console.log(socket.id)
+        //             return result
+        //         });
+        //     } catch (error) {
+        //         console.log(error);
+        //     }
+        // }
+
 
         //Status function
         showStatus = function(s) {
             socket.emit('status', s);
         }
     });
+
+
 
     async function getUserByEmail(email){
         try {
