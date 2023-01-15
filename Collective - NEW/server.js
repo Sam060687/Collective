@@ -309,7 +309,7 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         });
 
     socket.on('addChat', async (chat) => {
-        chats.insertOne({owner: chat.user.name, name: chat.chatName, members: chat.members}, function(){
+        chats.insertOne({owner: chat.user.name, name: chat.name, members: chat.members}, function(){
             io.emit('receiveChats', [chat])
         })            
     });
