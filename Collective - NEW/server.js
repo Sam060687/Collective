@@ -48,6 +48,10 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
+app.use((req, res, next) => {
+    req.io = io;
+    return next();
+  });
 
 
 
@@ -102,7 +106,9 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         passport.deserializeUser((_id, done) => {
           return done(null, getUserById(_id))
         })
+
       }
+
   
     console.log('Connected to MongoDB');
 
@@ -121,14 +127,9 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         });
 
     app.get('/login', checkNotAuthenticated, (req, res, socket) => {
-        // let session1 = req.session;
-        // if(session1){
-        //     
-        // }
-        // else{
            
             console.log("No session", socket.id)
-        // }
+
         res.render("login", {message: 'Please enter your email and password'})
         });
 
@@ -162,16 +163,22 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         }
     });
 
-    app.post('/message', checkNotAuthenticated,  (req, res) => {
+    app.get('/message', checkNotAuthenticated,  (req, res) => {
         try{
-             messages.insertOne({message: req.body.message, sender: req.body.user, time: req.body.time})
+           
+            //  messages.find({chatName: req.query.chatName}).toArray(function(err, result) {
+            //     if (err) throw err;
+            //     res.json(result)
+            // })
+             
              //console.log( req)
         }catch(err){
             console.log(err);
         }
     });
+
     app.get('/users', async (req, res) => {
-        //let id = 
+        
         try {
             users.find({"_id" : ObjectId(req.session.passport.user)}).toArray(function(err, result) {
                 if (err) throw err;
@@ -183,27 +190,6 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         }
 
     })
-    
-    // app.get('/friends', checkNotAuthenticated,  (req, res) => {
-    //     console.log("Friends")
-    //     // try {
-    //         users.find({"_id" : ObjectId(req.session.passport.user)},{friends}).toArray(function(err, result) {
-    //             if (err) throw err;
-    //             res.json(result)
-    //         })
-            
-    //      //} catch (error) {
-            
-    //     // }
-
-
-
-    //     // }catch(err){
-    //         // console.log(err);
-    //     // }
-    // });
-
-
 
       app.get("/chats", async (req, res) => {
         try {
@@ -243,16 +229,16 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
       }
 
 
-      function getUsername(id){
-        //var id2 = new ObjectId(id)
-       //console.log(id)
-            users.find(ObjectId(id)).toArray(function(err, result) {
-                if (err) throw err;
+    //   function getUsername(id){
+    //     //var id2 = new ObjectId(id)
+    //    //console.log(id)
+    //         users.find(ObjectId(id)).toArray(function(err, result) {
+    //             if (err) throw err;
                 
-                //console.log(result[0])
-            return result[0]
-            });
-        }
+    //             //console.log(result[0])
+    //         return result[0]
+    //         });
+    //     }
         
       
 
@@ -285,12 +271,12 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
             }  
             
             //Get chat list
-            socket.on('receiveChats', (chat) => {
-                
-                // chats.find( { },{ members :{ $elemMatch :{name : userId} }}).toArray(function(err, result) {
-                //     if (err) throw err;
+            socket.on('receiveChats', async (chat) => {
+                let user = await getUser(socket.id)
+                chats.find( { },{ members :{ $elemMatch :{name : user} }}).toArray(function(err, result) {
+                     if (err) throw err;
                 io.emit('receiveChats', [chat])
-                // });
+                });
             });
 
     //Receive messages
@@ -302,19 +288,63 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         });
     });
 
+    socket.on('loggedIn', async (user, sid) => {
+        try {
+            users.updateOne({"name" : user.name }, {$set: {socketId: sid}})
+        } catch (error) {
+            
+        }
+        
+        });
+
+        //Join chat
+        socket.on('loadMessages', async (chat) => {
+            messages.find({chat: chat.name}).toArray(function(err, result) {
+                if (err) throw err;
+                io.emit('receiveMessage', result)
+
+                messages.find({name: { $in: chat.members}}).toArray(function(err, result) {
+                    if (err) throw err;
+                    // io.emit('receiveChats', [chat])
+                    result.forEach(element => {
+                        io.to(element.socketId).emit('receiveChats', [chat])
+                    });
+                });
+
+
+            });
+        })
+
 
     socket.on('addFriend', async (user, friend) => {
-
          users.updateOne({"name" : user}, {$push: {friends: friend}})
         });
 
+
+        // socket.on('addChat', async (chat) => {
+        //     chats.insertOne({owner: chat.user.name, name: chat.name, members: chat.members}, function(){
+        //         io.emit('receiveChats', [chat])
+        //     })            
+        // });
     socket.on('addChat', async (chat) => {
-        chats.insertOne({owner: chat.user.name, name: chat.name, members: chat.members}, function(){
-            io.emit('receiveChats', [chat])
-        })            
+        chats.insertOne({owner: chat.user.name, name: chat.name, members: chat.members})
+        users.find({name: { $in: chat.members}}).toArray(function(err, result) {
+            if (err) throw err;
+            // io.emit('receiveChats', [chat])
+            result.forEach(element => {
+                io.to(element.socketId).emit('receiveChats', [chat])
+            });
+        });
+
     });
 
+    // socket.on('addChat', async (chat) => {
+    //     chats.insertOne({owner: chat.user.name, name: chat.name, members: chat.members}, function(){
 
+                
+            
+                   
+    // });
 
         //Send Messages
         socket.on('sendMessage', (msg, req) => {
@@ -334,6 +364,18 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
             }
     });      
         
+    async function getUser(sid){
+        try {
+            users.findOne({socketId: sid}, function(err, result) {
+                if (err) throw err;
+                return result
+            })
+
+        } catch (error) {
+            
+        }
+    }
+
 
         //Status function
         showStatus = function(s) {
@@ -352,21 +394,6 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         }
 
       }
-    //   async function getUser(req){
-
-    //     let user = ''
-
-    //     try {
-    //         // await app.get("/users", function(req, res){
-    //         //      user = req;
-    //         //   });
-    //         //   console.log(user)
-    //         user = req.session.passport.user
-    //           return user;
-              
-    //     } catch (error) { 
-    //         console.log(error);
-    //     }}
 
       async function getUserById(id){
         //console.log(id)

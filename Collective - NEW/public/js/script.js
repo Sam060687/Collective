@@ -1,5 +1,6 @@
 $(function() {
 
+
     class Message{
         constructor(sender, chat_id, message, date, time){
             this.sender = sender;
@@ -28,10 +29,12 @@ $(function() {
     socket.on('connect', async () => {
         //console.log('Connected to server')
         let user = await getUser();
-        //console.log(user)
+        let sid = socket.id;
         let chats = await getChats();
+
+        console.log("TEST", user, sid)
         try {
-            console.log(chats[0])
+            //console.log(chats[0])
             //console.log(chats)
             for(let x = 0; x < chats.length; x++){
                 //if(chats[x].members.includes(user.name)){
@@ -43,25 +46,26 @@ $(function() {
             
         }
         //socket.emit('receiveMessage')
-        socket.emit('loggedIn', await getUser())
+        socket.emit('loggedIn', user, sid)
 
     
 
     socket.on('receiveChats', async function(chat) {
-        console.log("ZZZZZZZ", chat)
+       console.log("ZZZZZZZ", chat)
         $('#chatList').append('<div class="chatContainer"><div class="chat" id="' + chat[0].name + '">' + chat[0].name + '</div></div>');
     })
 
 
+    //Load messages
     $(document).on('click','.chat',function(){
-        console.log('clicked', this.id)
+        socket.emit('loadMessages', this.id)
     })
   
 
     socket.on('receiveMessage', async function(msg) {
         
         let user = await getUser();
-        console.log(user)
+        //console.log(user)
 
             for(let x = 0; x < msg.length; x++){
 
@@ -102,6 +106,11 @@ $(function() {
         } catch (error) { 
             console.log(error);
         }}
+
+        //Load chat
+        $(document).on('click','.chat',async function(){
+            console.log(this.id)
+        })
 
     //Send Message
     $('#send').on('click', async function() {
@@ -146,7 +155,7 @@ $(function() {
     $('#submitAddFriend').on('click', async function() {
         let user = await getUser();
         let friend = $('#friend').val();
-        console.log(friend)
+       // console.log(friend)
         socket.emit('addFriend', user.name, friend);
     })
 
@@ -174,15 +183,12 @@ $('#createChat').on('click',  async function() {
     chatModal.style.display = "block";
 
     let user = await getUser();
-    console.log(user.friends)
+    //console.log(user.friends)
     for(let x = 0; x < user.friends.length; x++){
-        console.log(user.friends[x])
-       // $('#friendsList').append('<div class="messageContainer"><div class="message"><div class="received">' + user.friends[x] +": " + user.friends[x] +  '</div></div></div>');
          $('#friendsList').append('<div class="fChecklist"><input type="checkbox" id="' + user.friends[x] + '" name="' + user.friends[x] + '"><label for="' + user.friends[x] + '">' + user.friends[x] + '</label><br></div>')
 
     }
 })
-// chatBtn.onclick = async function() {
 
 
 // }
