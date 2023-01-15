@@ -19,6 +19,8 @@ $(function() {
             
     socket.on('connect', () => {
         console.log('Connected to server')
+        let user = getUser();
+        getChats();
         //socket.handshake.userdata = req.session.passport.user;
 
         // module.exports = function(req, res, next){
@@ -40,12 +42,17 @@ $(function() {
 
     
 
+    //Receive chats
+    
+    // socket.on('receiveChats', function(chats) {
+    //     console.log(chats[0].name)
+    //     for(let x = 0; x < chats.length; x++){
+
+    //             $('#chatList').append('<div class="chatContainer"><div class="chat" id="' + chats[x].name + '">' + chats[x].name + '</div></div>');
+
+    // }})
+
     //Receive messages
-
-    socket.on('receiveChats', function(chats) {
-       // console.log("testing: ", chats);
-    })
-
 
     socket.on('receiveMessage', async function(msg) {
         
@@ -67,6 +74,19 @@ $(function() {
         
     })
 
+    async function getChats(userId){
+        try {
+            let chats = []
+            let user = userId
+            await $.get("/chats", function(req, res){
+                 chats = res;
+                
+              });
+              return chats;
+        } catch (error) { 
+            console.log(error);
+        }}
+
     async function getUser(){
         let user = ''
 
@@ -83,6 +103,7 @@ $(function() {
     //Send Message
     $('#send').on('click', async function() {
         let user = await getUser();
+        //console.log(user)
         const msg = new Message
         msg.sender = user;
         msg.chat_id = 3;
