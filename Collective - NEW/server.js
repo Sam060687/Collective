@@ -181,11 +181,19 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
 
       })
 
-      app.get("/chats", (req, res) => {
+      app.get("/chats", async (req, res) => {
         
-        chats.find({members: "sam"}).toArray(function(err, result) {
+        // chats.find( { },{ members :{ $elemMatch :{name : "sam"} }}).toArray(function(err, result) {
+        //     if (err) throw err;
+        let usr = await users.find({"_id" : ObjectId(req.session.passport.user)}).toArray()
+        //let user = await getUserById(req.session.passport.user)
+        
+        //console.log(usr[0].email)
+        chats.find({members: usr[0].name}).toArray(function(err, result) {
             if (err) throw err;
-            console.log(chats[0]);
+            
+            //console.log(req.session.passport.user)
+           //console.log(result);
 
             res.json(result)
         });
@@ -315,10 +323,24 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
       }
 
       async function getUserById(id){
-        let result = await users.find({_id: id}).toArray();
+       // let result = await users.find({_id: id}).toArray();
+       let user;
+       try {
+        let res = await users.find({"_id" : ObjectId(id)}).toArray(function(err, result) {
+            if (err) throw err;
+            user = result;
+            //console.log(result)
+        })
+        return user
+       //return res[0];
+       } catch (error) {
+        
+       }
+
+        //console.log(result)
         //console.log(result[0])
         //let query = users.find({email : email})
-        return result[0];
+        
       }
       function saveUser(req){
         // passport.user = req.user;

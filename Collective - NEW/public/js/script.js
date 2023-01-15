@@ -17,42 +17,27 @@ $(function() {
         withCredentials: true
     });
             
-    socket.on('connect', () => {
-        console.log('Connected to server')
-        let user = getUser();
-        getChats();
-        //socket.handshake.userdata = req.session.passport.user;
+    socket.on('connect', async () => {
+        //console.log('Connected to server')
+        let user = await getUser();
+        //console.log(user)
+        let chats = await getChats();
+        try {
+            console.log(chats)
+            for(let x = 0; x < chats.length; x++){
 
-        // module.exports = function(req, res, next){
-        //     req.user = req.user || null;
-        //     next();
-        // }
+                    $('#chatList').append('<div class="chatContainer"><div class="chat" id="' + chats[x].name + '">' + chats[x].name + '</div></div>');
+        }
+        } catch (error) {
+            
+        }
+
     })
 
-
-    //Populate chat list
-    // socket.on('chatList', function(chats) {
-        
-    //     if(chats.length > 0){
-    //         chats.forEach(element => {
-    //             $('#chatList').append('<div class="chatContainer"><div class="chat">' + element.name + '</div></div>'); // socket not needed?
-    //         });
-    //     }
-    // })
-
-    
-
-    //Receive chats
-    
-    // socket.on('receiveChats', function(chats) {
-    //     console.log(chats[0].name)
-    //     for(let x = 0; x < chats.length; x++){
-
-    //             $('#chatList').append('<div class="chatContainer"><div class="chat" id="' + chats[x].name + '">' + chats[x].name + '</div></div>');
-
-    // }})
-
-    //Receive messages
+    $(document).on('click','.chat',function(){
+        console.log('clicked', this.id)
+    })
+  
 
     socket.on('receiveMessage', async function(msg) {
         
@@ -68,24 +53,25 @@ $(function() {
                     $('#chatWindow').append('<div class="messageContainer"><div class="message"><div class="received">' + msg[x].sender+": " + msg[x].message +  '</div></div></div>');
                 }
             }
-            
-        //}
-    
-        
     })
 
-    async function getChats(userId){
-        try {
-            let chats = []
-            let user = userId
+    async function getChats(){
+        // try {
+            let chats;
             await $.get("/chats", function(req, res){
-                 chats = res;
+                //  chats = req;
+                chats = req   
+                console.log(req)
                 
               });
-              return chats;
-        } catch (error) { 
-            console.log(error);
-        }}
+
+              return chats
+            }
+              //console.log(chats)
+              
+        // } catch (error) { 
+        //     console.log(error);
+        // }}
 
     async function getUser(){
         let user = ''
