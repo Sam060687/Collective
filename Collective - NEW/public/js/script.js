@@ -31,10 +31,13 @@ $(function() {
         //console.log(user)
         let chats = await getChats();
         try {
-            console.log(chats)
+            console.log(chats[0])
+            //console.log(chats)
             for(let x = 0; x < chats.length; x++){
+                //if(chats[x].members.includes(user.name)){
 
                     $('#chatList').append('<div class="chatContainer"><div class="chat" id="' + chats[x].name + '">' + chats[x].name + '</div></div>');
+                //}
         }
         } catch (error) {
             
@@ -45,8 +48,8 @@ $(function() {
     
 
     socket.on('receiveChats', async function(chat) {
-        console.log(chat)
-        $('#chatList').append('<div class="chatContainer"><div class="chat" id="' + chat.chatName + '">' + chat.chatName + '</div></div>');
+        console.log("ZZZZZZZ", chat)
+        $('#chatList').append('<div class="chatContainer"><div class="chat" id="' + chat[0].name + '">' + chat[0].name + '</div></div>');
     })
 
 
@@ -124,7 +127,7 @@ $(function() {
 
         let newChat = new Chat
         newChat.user = user
-        newChat.chatName = $('#chatName').val();
+        newChat.name = $('#chatName').val();
 
         let chatFriendsList = [];
         chatFriendsList.push(user.name)
