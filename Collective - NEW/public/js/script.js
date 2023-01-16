@@ -2,9 +2,8 @@ $(function() {
 
 
     class Message{
-        constructor(sender, chat_id, message, date, time){
+        constructor(sender, message, date, time){
             this.sender = sender;
-            this.chat_id = chat_id;
             this.message = message;
             this.date = date;
             this.time = time;
@@ -128,14 +127,10 @@ $(function() {
     //Send Message
     $('#send').on('click', async function() {
 
-
-
         let user = await getUser();
-        //console.log(user)
+
         const msg = new Message
         msg.sender = user.name;
-        console.log(msg.sender)
-        //msg.chat_id = 3;
         msg.message = $('#message').val();
         msg.date = '3333333333';
         msg.time = '3333333333';
@@ -174,6 +169,7 @@ $(function() {
         let friend = $('#friend').val();
        // console.log(friend)
         socket.emit('addFriend', user.name, friend);
+        friendModal.style.display = "none";
     })
 
 
@@ -200,7 +196,6 @@ $('#createChat').on('click',  async function() {
     chatModal.style.display = "block";
 
     let user = await getUser();
-    //console.log(user.friends)
     for(let x = 0; x < user.friends.length; x++){
          $('#friendsList').append('<div class="fChecklist"><input type="checkbox" id="' + user.friends[x] + '" name="' + user.friends[x] + '"><label for="' + user.friends[x] + '">' + user.friends[x] + '</label><br></div>')
 
@@ -211,7 +206,6 @@ $('#createChat').on('click',  async function() {
 // }
 friendBtn.onclick = async function() {
     friendModal.style.display = "block";
-
   }
 
 // When the user clicks on <span> (x), close the modal
@@ -227,7 +221,6 @@ friendSpan.onclick = function() {
 window.onclick = function(event) {
   if (event.target == chatModal) {
     chatModal.style.display = "none";
-
   }
   if (event.target == friendModal) {
 

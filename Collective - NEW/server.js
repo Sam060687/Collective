@@ -8,25 +8,16 @@ const express = require('express');
 const app = express();
 const server = require("http").createServer(app);
 const bodyParser = require('body-parser');
-var sessionstore = require('sessionstore');
+//var sessionstore = require('sessionstore');
 var ObjectId = require('mongodb').ObjectId;
-// const MongoDbStore = require('connect-mongo');
-
-// const mongoose = require('mongoose');
-//const router = express.Router();
 
 //Login handler modules
 const LocalStrategy = require('passport-local').Strategy
-//const User = require('./models/Users');
-//const auth = require('./routes/auth.js');
 const flash = require('express-flash');
 let session = require('express-session');
 const passport = require('passport');
-// const sharedsession = require("express-socket.io-session");
-// const passportSocketIo = require('passport.socketio');
-// const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
-//const initializePassport  = require('./passportConfig');
+
 
 const io = require('socket.io')(server, {
     cors: {
@@ -55,14 +46,6 @@ app.use((req, res, next) => {
 
 
 
-// io.use(sharedsession(session, {
-//     autoSave:true,
-//     secret: process.env.SESSION_SECRET,
-//     saveUninitialized: true,
-//     resave: false,
-
-// }));
-
 app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
@@ -74,12 +57,15 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
 
 
     if (err){ throw err;}
+    console.log('Connected to MongoDB');
 
+    //Define database and collections
     let dbo = db.db('collective')
     let chats = dbo.collection('chats');
     let users = dbo.collection('users');
     let sessions = dbo.collection('sessions');
 
+    //Passport functions    
     function initialize(passport) {
         const authenticateUser = async (email, password, done) => {
           const user = await getUserByEmail(email)
@@ -87,9 +73,7 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
           if (user == null) {
             return done(null, false, { message: 'Account not found' })
           }
-          //console.log(user.password)
           try {
-              //console.log(password, user.password)
               sessions.insertOne({user: user, socketId: io.socket})
             if (await bcrypt.compare(password, user.password)) {
               return done(null, user)
@@ -109,14 +93,11 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
 
       }
 
-  
-    console.log('Connected to MongoDB');
-
-    initialize(
-        passport,
-        email => users.findOne({email: email}),
-        id => users.findOne({id: id})
-      )
+        initialize(
+            passport,
+            email => users.findOne({email: email}),
+            id => users.findOne({id: id})
+        )
 
     
 
@@ -132,7 +113,6 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
 
         res.render("login", {message: 'Please enter your email and password'})
         });
-
 
 
     app.post('/login',
@@ -162,20 +142,6 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
             console.log(err);
         }
     });
-
-    // app.get('/messages', checkNotAuthenticated,  (req, res) => {
-    //     try{
-           
-    //          messages.find({chatName: req.query.chatName}).toArray(function(err, result) {
-    //             if (err) throw err;
-    //             res.json(result)
-    //         })
-             
-    //          //console.log( req)
-    //     }catch(err){
-    //         console.log(err);
-    //     }
-    // });
 
     app.get('/users', async (req, res) => {
         
@@ -229,22 +195,7 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
       }
 
 
-    //   function getUsername(id){
-    //     //var id2 = new ObjectId(id)
-    //    //console.log(id)
-    //         users.find(ObjectId(id)).toArray(function(err, result) {
-    //             if (err) throw err;
-                
-    //             //console.log(result[0])
-    //         return result[0]
-    //         });
-    //     }
-        
-      
-
-
-    //Socket.io connection
-
+    //Socket.io
     io.on('connection', async function (socket) {
 
         let chats = dbo.collection('chats');
@@ -255,17 +206,10 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
 
                 messages.find({}).toArray(function(err, result) {
                     if (err) throw err;
-                
-                    //users.updateOne({"name" : user }, {$set: {socketId: socket.id}})
-                    
-                //socket.emit('receiveMessage', result)
+
                 });
 
-                // chats.find({members: "sam"}).toArray(function(err, result) {
-                //     if (err) throw err;
-                    
-                //io.to(socket.id).emit('receiveChats', result)
-                // });
+
             }catch(err){
                 console.log(err);
             }  
@@ -279,14 +223,6 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
                 });
             });
 
-    //Receive messages
-    // socket.on('receiveMessage', (msg) => {
-        
-    //     // messages.find({}).toArray(function(err, result) {
-    //     //     if (err) throw err;            
-    //     io.emit('receiveMessage', msg)
-    //     // });
-    // });
 
     socket.on('loggedIn', async (user, sid) => {
         try {
@@ -309,10 +245,6 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
                 //console.log(result)
                 io.to(socket.id).emit('receiveMessage', result)
             });
-            // io.to(socket.rooms[1]).emit('receiveMessage', messages)
-            //io.to(socket.id).emit('loadMessages')
-
-            //console.log(socket.rooms)
             })
 
         //Get Messages
@@ -347,11 +279,6 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         });
 
 
-        // socket.on('addChat', async (chat) => {
-        //     chats.insertOne({owner: chat.user.name, name: chat.name, members: chat.members}, function(){
-        //         io.emit('receiveChats', [chat])
-        //     })            
-        // });
     socket.on('addChat', async (chat) => {
         chats.insertOne({owner: chat.user.name, name: chat.name, members: chat.members})
         users.find({name: { $in: chat.members}}).toArray(function(err, result) {
@@ -364,20 +291,10 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
 
     });
 
-    // socket.on('addChat', async (chat) => {
-    //     chats.insertOne({owner: chat.user.name, name: chat.name, members: chat.members}, function(){
-
-                
-            
-                   
-    // });
 
         //Send Messages
         socket.on('sendMessage', async (msg, req) => {
-            // var room = await Array.from(socket.rooms);
-            // console.log(room[1])
             let sender = msg.sender;
-            //let chat_id = msg.chat_id;
             let message = msg.message;
             let date = msg.date;
             let time = msg.time;
@@ -391,7 +308,8 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
             catch(err){
                 console.log(err);
             }
-    });      
+    });
+
         
     async function getUser(sid){
         try {

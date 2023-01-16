@@ -13,27 +13,38 @@
 
 </head>
 <body>
-    <h1>Login</h1>
-    <% if (messages.error) { %>
-        <div class="alert alert-danger" role="alert">
-            <%= messages.error %>
-        </div>
-    <% } %>
-    <form action="/login" method="POST">
-        <div>
-            <label for="email">Email</label>
-            <input type="email" name="email" id="email">
-        </div>
-        <div>
-            <label for="password">Password</label>
-            <input type="password" name="password" id="password">
-        </div>
-        <button type="submit">Login</button>
-        <br>
-        <br>
-        <a href="/register">Register</a>
+
     
-        <h1><%= message %> </h1>
+<div class="loginRegisterContainer">
+        <div id="loginCont">
+
+            <h1 class="text-center">Collective Messenger</h1>
+
+            <h1>Login</h1>
+            <% if (messages.error) { %>
+                <div class="alert alert-danger" role="alert">
+                    <%= messages.error %>
+                </div>
+            <% } %>
+            <form action="/login" method="POST">
+                <div>
+                    <label for="email">Email</label>
+                    <input type="email" name="email" id="email">
+                </div>
+                <div>
+                    <label for="password">Password</label>
+                    <input type="password" name="password" id="password">
+                </div>
+                <button type="submit">Login</button>
+                <br>
+                <br>
+                <a href="/register">Register</a>
+            
+                <!-- <h1><%= message %> </h1> -->
+            </form>
+        </div>
+    </div>
+
 
 </body>
 </html>
