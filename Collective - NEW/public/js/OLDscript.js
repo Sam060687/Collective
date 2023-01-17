@@ -2,9 +2,10 @@ $(function() {
 
 
     class Message{
-        constructor(sender, message, date, time){
+        constructor(sender, roomId,  message, date, time){
             this.sender = sender;
             this.message = message;
+            this.roomId = roomId;
             this.date = date;
             this.time = time;
         }
@@ -15,6 +16,13 @@ $(function() {
             this.owner = owner;
             this.name = name;
             this.members = members;
+        }
+    }
+
+    class Chatroom{
+        constructor(name, roomId){
+            this.name = name;
+            this.roomId = roomId;
         }
     }
 
@@ -33,7 +41,8 @@ $(function() {
         //console.log("TEST", user, sid)
         try {
             for(let x = 0; x < chats.length; x++){
-                $('#chatList').append('<div class="chatContainer"><div class="chat" id="' + chats[x].name + '">' + chats[x].name + '</div></div>');
+                // console.log(chats[x]._id)
+                $('#chatList').append('<div class="chatContainer"><div class="chat" id="' + chats[x]._id + '">' + chats[x].name + '</div></div>');
             }
         } catch (error) {
             
@@ -41,30 +50,27 @@ $(function() {
         //socket.emit('receiveMessage')
         socket.emit('loggedIn', user, sid)
 
-    socket.on('friendAdded', async function(result) {
-        $('#addFriendNotification').text(result)
-    })
+    
 
     socket.on('receiveChats', async function(chat) {
-        //let chats = await getChats();
        console.log("ZZZZZZZ", chat)
-        $('#chatList').append('<div class="chatContainer"><div class="chat" id="' + chat[0].name + '">' + chat[0].name + '</div></div>');
+       
+        $('#chatList').append('<div class="chatContainer"><div class="chat" id="' + chat[0]._id + '">' + chat[0]._id + '</div></div>');
     })
 
-    socket.on('chatAdded', async function(msg) {
-        console.log(msg)
-        $('#createChatNotification').text(msg)
-    })
 
         
         //Join Room
         $(document).on('click','.chat', function(){
             $('#chatWindow').empty();
-            $('#chatroomNameTop').text("Chatting in : " + this.id)
             //console.log(this.id)
-            
-            socket.emit('joinRoom', this.id)
-            
+            $('.chat').removeClass('chatSelected')
+            $(this).addClass('chatSelected')
+            //console.log(this.id)
+            let cRoom = new Chatroom
+            cRoom.name = $(this).val()
+            cRoom.roomId = $(this).id
+            socket.emit('joinRoom', cRoom)
             //socket.emit('getMessages', this.id)
                 
         })
@@ -130,43 +136,28 @@ $(function() {
 
     //Send Message
     $('#send').on('click', async function() {
+        let chatRoomId = $('.chatSelected').attr('id')
+        console.log(chatRoomId)
+        let user = await getUser();
 
-        if (!$('#message').val() == '') {
-            $('#sendMessageNotification').text('')
-
-            try {
-                
-                let dateTime = new Date();
-                let getTime = dateTime.getHours() + ":" + dateTime.getMinutes() + ":" + dateTime.getSeconds();
-                let getDate = dateTime.getDate() + "/" + (dateTime.getMonth() + 1) + "/" + dateTime.getFullYear();
+        const msg = new Message
+        // msg.roomId = socket.rooms[1];
+        msg.sender = user.name;
+        msg.message = $('#message').val();
+        msg.date = '3333333333';
+        msg.time = '3333333333';
         
-                let user = await getUser();
-        
-                const msg = new Message
-                msg.sender = user.name;
-                msg.message = $('#message').val();
-                msg.date = getDate;
-                msg.time = getTime;
-
-                $('#message').val('')
-                socket.emit('sendMessage', msg);
-                $('#chatWindow').scrollTop = $('#chatWindow').scrollHeight//- $('#chatWindow').clientHeight
-
-            } catch (error) {
-                
-            }
-
-        }
-        else{
-            $('#sendMessageNotification').text('Please enter a message')
-        }
-
-
+        $('#message').val();
+        console.log(msg);
+        $('#message').val('')
+        socket.emit('sendMessage', msg);
+        $('#chatWindow').scrollTop = $('#chatWindow').scrollHeight//- $('#chatWindow').clientHeight
     })
     
     $('#submitCreateChat').on('click', async function() {
 
         let user = await getUser();
+
         let newChat = new Chat
         newChat.user = user
         newChat.name = $('#chatName').val();
@@ -176,15 +167,17 @@ $(function() {
 
         let chatFriendsList = [];
         chatFriendsList.push(user.name)
+
         $('input[type=checkbox]').each(function () {
             if (this.checked){
                 chatFriendsList.push($(this).attr('id'))
             }
             //chatFriendsList += (chatFriendsList=="" ? sThisVal : "," + sThisVal);
         });
+
         newChat.members = chatFriendsList;
         socket.emit('addChat', newChat);
-        // chatModal.style.display = "none";
+        chatModal.style.display = "none";
         }
         else{
             $('#createChatNotification').text('Chat name cannot be empty')
@@ -200,7 +193,7 @@ $(function() {
         if (!friend == ''){
             $('#addFriendNotification').text('')
             socket.emit('addFriend', user.name, friend);
-            //friendModal.style.display = "none";
+            friendModal.style.display = "none";
          }
             else{
                 $('#addFriendNotification').text('Friend name cannot be empty')
@@ -242,7 +235,6 @@ $('#createChat').on('click',  async function() {
 
 // }
 friendBtn.onclick = async function() {
-    $('#addFriendNotification').text('')
     friendModal.style.display = "block";
   }
 

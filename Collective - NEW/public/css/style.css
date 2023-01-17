@@ -89,6 +89,10 @@ body{
     cursor: pointer;   
 }
 
+.chatSelected{
+    background-color: rgb(53, 167, 167);
+}
+
 .chat{
     color: azure;
     padding: 3px;

@@ -163,12 +163,9 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
             chats.find({members: usr[0].name}).toArray(function(err, result) {
              if (err) throw err;
              res.json(result)
-         });
-            
+         });  
         } catch (error) {
-            
         }
-
       });
 
     app.get("/logout", (req, res) => {
@@ -207,8 +204,7 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
                 messages.find({}).toArray(function(err, result) {
                     if (err) throw err;
 
-                });
-
+                }); 
 
             }catch(err){
                 console.log(err);
@@ -217,7 +213,7 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
             //Get chat list
             socket.on('receiveChats', async (chat) => {
                 let user = await getUser(socket.id)
-                chats.find( { },{ members :{ $elemMatch :{name : user} }}).toArray(function(err, result) {
+                chats.find( { members :{ $elemMatch :{name : user} }}).toArray(function(err, result) {
                      if (err) throw err;
                 io.emit('receiveChats', [chat])
                 });
@@ -275,33 +271,92 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
 
 
     socket.on('addFriend', async (user, friend) => {
-         users.updateOne({"name" : user}, {$push: {friends: friend}})
+
+        //Does the friend exist?
+        users.findOne({name: friend}, function(err, result) {
+            if (err) throw err;
+                if(result){
+                    //Does the user already have the friend?
+                    users.findOne({name: user, friends: friend}, function(err, result) {
+                        if (err) throw err;
+                            if(result){
+                                io.to(socket.id).emit('friendAdded', "Already a friend")
+                            }else{
+                                users.updateOne({"name" : user}, {$push: {friends: friend}})
+                                io.to(socket.id).emit('friendAdded', "Friend added")
+                            }
+                    });
+                }else{
+                    io.to(socket.id).emit('friendAdded', "User does not exist")
+                }
         });
+    });
+
+                
+  
+
+
 
 
     socket.on('addChat', async (chat) => {
-        chats.insertOne({owner: chat.user.name, name: chat.name, members: chat.members})
-        users.find({name: { $in: chat.members}}).toArray(function(err, result) {
+        console.log("Name: ", chat.name)
+        chats.findOne({name: chat.name}, function(err, result) {
+            console.log("Result: ", result)
             if (err) throw err;
-            // io.emit('receiveChats', [chat])
-            result.forEach(element => {
-                io.to(element.socketId).emit('receiveChats', [chat])
-            });
+                if(result){
+                    console.log("Chatroom name already exists")
+                    io.to(socket.id).emit('chatAdded', "Chatroom name already exists")
+                }else{
+                    chats.insertOne({owner: chat.user.name, name: chat.name, members: chat.members})
+                    io.to(socket.id).emit('chatAdded', "Chat added")
+                    io.to(socket.id).emit('receiveChats', [chat])
+                }
         });
-
     });
+
+
+
+        // chats.insertOne({owner: chat.user.name, name: chat.name, members: chat.members})
+        // users.find({name: { $in: chat.members}}).toArray(function(err, result) {
+        //     if (err) throw err;
+        //     // io.emit('receiveChats', [chat])
+        //     result.forEach(element => {
+        //         io.to(element.socketId).emit('receiveChats', [chat])
+        //     });
+        // });
+
+
+        //         //Does the friend exist?
+        //         users.findOne({name: friend}, function(err, result) {
+        //             if (err) throw err;
+        //                 if(result){
+        //                     //Does the user already have the friend?
+        //                     users.findOne({name: user, friends: friend}, function(err, result) {
+        //                         if (err) throw err;
+        //                             if(result){
+        //                                 io.to(socket.id).emit('friendAdded', "Already a friend")
+        //                             }else{
+        //                                 users.updateOne({"name" : user}, {$push: {friends: friend}})
+        //                                 io.to(socket.id).emit('friendAdded', "Friend added")
+        //                             }
+        //                     });
+        //                 }else{
+        //                     io.to(socket.id).emit('friendAdded', "User does not exist")
+        //                 }
+        //         });
+
 
 
         //Send Messages
         socket.on('sendMessage', async (msg, req) => {
-            let sender = msg.sender;
-            let message = msg.message;
-            let date = msg.date;
-            let time = msg.time;
+            // let sender = msg.sender;
+            // let message = msg.message;
+            // let date = msg.date;
+            // let time = msg.time;
             var room = await Array.from(socket.rooms);
             console.log("test", room[1])
             try{
-                messages.insertOne({sender: sender, roomName: room[1], message: message, date: "today", time: time}, function(){
+                messages.insertOne({sender: msg.sender, roomName: room[1], message: msg.message, date: msg.date, time: msg.time}, function(){
                     io.to(room[1]).emit('receiveMessage', [msg])
                 })            
              }
@@ -395,4 +450,3 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
 });
 
 module.exports = app;
-
