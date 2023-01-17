@@ -26,21 +26,15 @@ $(function() {
     });
             
     socket.on('connect', async () => {
-        //console.log('Connected to server')
+
         let user = await getUser();
         let sid = socket.id;
         let chats = await getChats();
-
-        console.log("TEST", user, sid)
+        //console.log("TEST", user, sid)
         try {
-            //console.log(chats[0])
-            //console.log(chats)
             for(let x = 0; x < chats.length; x++){
-                //if(chats[x].members.includes(user.name)){
-
-                    $('#chatList').append('<div class="chatContainer"><div class="chat" id="' + chats[x].name + '">' + chats[x].name + '</div></div>');
-                //}
-        }
+                $('#chatList').append('<div class="chatContainer"><div class="chat" id="' + chats[x].name + '">' + chats[x].name + '</div></div>');
+            }
         } catch (error) {
             
         }
@@ -50,7 +44,7 @@ $(function() {
     
 
     socket.on('receiveChats', async function(chat) {
-       console.log("ZZZZZZZ", chat)
+       //console.log("ZZZZZZZ", chat)
         $('#chatList').append('<div class="chatContainer"><div class="chat" id="' + chat[0].name + '">' + chat[0].name + '</div></div>');
     })
 
@@ -65,6 +59,7 @@ $(function() {
             //socket.emit('getMessages', this.id)
                 
         })
+
     // $(document).on('click','.chat', function(){
     //     $('#chatWindow').empty();
     //     socket.leave(socket.rooms)[1]
@@ -150,6 +145,9 @@ $(function() {
         newChat.user = user
         newChat.name = $('#chatName').val();
 
+        if(!newChat.name == ''){
+            $('#createChatNotification').text('')
+
         let chatFriendsList = [];
         chatFriendsList.push(user.name)
         $('input[type=checkbox]').each(function () {
@@ -160,6 +158,12 @@ $(function() {
         });
         newChat.members = chatFriendsList;
         socket.emit('addChat', newChat);
+        chatModal.style.display = "none";
+        }
+        else{
+            $('#createChatNotification').text('Chat name cannot be empty')
+        
+        }
        
 
     })
@@ -167,9 +171,15 @@ $(function() {
     $('#submitAddFriend').on('click', async function() {
         let user = await getUser();
         let friend = $('#friend').val();
-       // console.log(friend)
-        socket.emit('addFriend', user.name, friend);
-        friendModal.style.display = "none";
+        if (!friend == ''){
+            $('#addFriendNotification').text('')
+            socket.emit('addFriend', user.name, friend);
+            friendModal.style.display = "none";
+         }
+            else{
+                $('#addFriendNotification').text('Friend name cannot be empty')
+            }
+
     })
 
 
@@ -195,11 +205,12 @@ $('#createChat').on('click',  async function() {
     $('#friendsList').empty();
     chatModal.style.display = "block";
 
+        
     let user = await getUser();
     for(let x = 0; x < user.friends.length; x++){
          $('#friendsList').append('<div class="fChecklist"><input type="checkbox" id="' + user.friends[x] + '" name="' + user.friends[x] + '"><label for="' + user.friends[x] + '">' + user.friends[x] + '</label><br></div>')
-
-    }
+    } 
+    
 })
 
 

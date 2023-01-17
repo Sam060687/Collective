@@ -5,27 +5,23 @@ body{
 ::-webkit-scrollbar {
     width: 10px;
     background-color: #fefefe;
-    
-  }
+}
 
-  ::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
     box-shadow: inset 0 0 5px grey;
     border-radius: 3%;
-
-  }
+}
 
 ::-webkit-scrollbar-thumb {
     background: rgb(26, 97, 97);
     border-radius: 10px;
-  }
-
+}
 
 #loginCont{
-background-color: rgb(26, 97, 97);
-min-width: 25%;
-padding: 20px;
-border-radius: 3%;
-
+    background-color: rgb(26, 97, 97);
+    min-width: 25%;
+    padding: 20px;
+    border-radius: 3%;
 }
 
 .loginRegisterContainer {
@@ -43,8 +39,6 @@ border-radius: 3%;
 }
 
 .chatWindow{
-    /* display: flex;
-    flex-direction: column-reverse; */
     max-height: 300px;
     max-width: 90%;
     min-height: 200px;
@@ -58,15 +52,14 @@ border-radius: 3%;
 }
 
 .messageContainer{
-    
     width: 100%;
     display: inline-block;
-    
-    
 }
+
 #message{
     width: 80%;
 }
+
 #send{
     width: 10%;;
 }
@@ -81,6 +74,7 @@ border-radius: 3%;
     overflow: scroll;
     overflow-x: hidden;
 }
+
 .chatContainer{
 
     width: 100%;
@@ -88,30 +82,24 @@ border-radius: 3%;
     background-color: rgb(26, 97, 97);
     margin: 1px;
     border-radius: 3px;
-    
 }
 
 .chatContainer:hover{
-
     background-color: rgb(53, 167, 167);
-    cursor: pointer;
-
-    
+    cursor: pointer;   
 }
 
 .chat{
     color: azure;
-padding: 3px;
-
-
+    padding: 3px;
 }
-.sent{
-width: fit-content;
-float: right;
-background-color: rgb(26, 97, 97);
-border-radius: 5px;
-padding: 10px;
 
+.sent{
+    width: fit-content;
+    float: right;
+    background-color: rgb(26, 97, 97);
+    border-radius: 5px;
+    padding: 10px;
 }
 
 .received{
@@ -120,7 +108,10 @@ padding: 10px;
     background-color: rgb(26, 97, 97);
     border-radius: 5px;
     padding: 10px;
+}
 
+.spanNotification{
+    color: red;
 }
 
 /* Modal */
@@ -141,10 +132,10 @@ padding: 10px;
     -webkit-animation-duration: 0.4s;
     animation-name: fadeIn;
     animation-duration: 0.4s
-  }
+}
   
   /* Modal Content */
-  .modal-content {
+.modal-content {
     position: fixed;
     bottom: 0;
     background-color: #fefefe;
@@ -153,36 +144,38 @@ padding: 10px;
     -webkit-animation-duration: 0.4s;
     animation-name: slideIn;
     animation-duration: 0.4s
-  }
+}
   
   /* The Close Button */
-  .close {
+.close {
     color: white;
     float: right;
     font-size: 28px;
     font-weight: bold;
-  }
+}
   
-  .close:hover,
-  .close:focus {
+.close:hover,
+.close:focus {
     color: #000;
     text-decoration: none;
     cursor: pointer;
-  }
+}
   
-  .modal-header {
+.modal-header {
     padding: 2px 16px;
     background-color: rgb(26, 97, 97);
     color: white;
-  }
+}
   
-  .modal-body {padding: 2px 16px;height: 400px;}
+  .modal-body {
+    padding: 2px 16px;
+    height: 400px;
+}
   
-  .modal-footer {
+.modal-footer {
     padding: 2px 16px;
     background-color: rgb(26, 97, 97);
     color: white;
-    
   }
   
   /* Add Animation */

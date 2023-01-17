@@ -50,22 +50,26 @@
         <h2>Create Chat</h2>
         <h2></h2>
       </div>
-      <div class="modal-body">
-        <input type="text" id="chatName" placeholder="Please enter a chat name">
-        <div id="friendsList">
 
+      <div class="modal-body">
+        <br>
+        <div>
+            <label for="chatName">Chat Name: </label>
+            <input type="text" id="chatName" placeholder="Please enter a chat name"></div>
+        <br>
+        <div id="friendsList">
         </div>
-        
+        <br>
+        <span id="createChatNotification" class="spanNotification"></span>
       </div>
+
       <div class="modal-footer">
-        
             <h3>
             <button id="submitCreateChat">Create Chat</button>
         </h3>
-        
       </div>
+
     </div>
-  
   </div>
 
 
@@ -78,23 +82,19 @@
         <h2>Add Friend</h2>
       </div>
       <div class="modal-body">
-
-
-        
+        <br>
             <div>
                 <label for="friend">Friend Name: </label>
                 <input type="text" name="friend" id="friend" placeholder="Please enter friend name">
             </div>
-
-            <button id="submitAddFriend">Add Friend</button>
+            
+            <br>
+            <span id="addFriendNotification" class="spanNotification"></span>
     </form> 
         
       </div>
       <div class="modal-footer">
-        
-            <h3>
-            
-        </h3>
+       <h3> <button id="submitAddFriend">Add Friend</button></h3>
         
       </div>
     </div>
