@@ -40,9 +40,8 @@ body{
 
 .chatWindow{
     max-height: 300px;
-    max-width: 90%;
-    min-height: 200px;
-    
+    min-height: 300px;
+    max-width: 90%; 
     width: 100%;
     display: inline-block;
     padding: 4px;
@@ -52,6 +51,7 @@ body{
 }
 
 .messageContainer{
+    color: #fefefe;
     width: 100%;
     display: inline-block;
 }
@@ -65,7 +65,8 @@ body{
 }
 
 #chatList{
-    min-height: 150px;
+    max-height: 300px;
+    min-height: 300px;
     max-width: 90%;
     width: 100%;
     display: inline-block;
@@ -76,7 +77,6 @@ body{
 }
 
 .chatContainer{
-
     width: 100%;
     display: inline-block;
     background-color: rgb(26, 97, 97);

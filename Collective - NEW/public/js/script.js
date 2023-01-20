@@ -20,7 +20,6 @@ $(function() {
 
 
     //Connect to socket.io
-    
     const socket = io.connect('http://localhost:3001',{
         withCredentials: true
     });
@@ -29,65 +28,50 @@ $(function() {
 
         let user = await getUser();
         let sid = socket.id;
-        let chats = await getChats();
-        //console.log("TEST", user, sid)
+
+        //Get chats from route and apply to chat list
         try {
+        let chats = await getChats();
+
             for(let x = 0; x < chats.length; x++){
                 $('#chatList').append('<div class="chatContainer"><div class="chat" id="' + chats[x].name + '">' + chats[x].name + '</div></div>');
             }
-        } catch (error) {
-            
-        }
-        //socket.emit('receiveMessage')
+        } catch (error) {}
+
         socket.emit('loggedIn', user, sid)
 
+    //Notify user of result after adding a new friend
     socket.on('friendAdded', async function(result) {
+
         $('#addFriendNotification').text(result)
     })
 
+    //Add new chat to chat list
     socket.on('receiveChats', async function(chat) {
-        //let chats = await getChats();
-       console.log("ZZZZZZZ", chat)
-        $('#chatList').append('<div class="chatContainer"><div class="chat" id="' + chat[0].name + '">' + chat[0].name + '</div></div>');
+        
+        $('#chatList').prepend('<div class="chatContainer"><div class="chat" id="' + chat[0].name + '">' + chat[0].name + '</div></div>');
     })
 
+    //Notify user of result after adding a new chat
     socket.on('chatAdded', async function(msg) {
-        console.log(msg)
+
         $('#createChatNotification').text(msg)
     })
-
         
-        //Join Room
-        $(document).on('click','.chat', function(){
-            $('#chatWindow').empty();
-            $('#chatroomNameTop').text("Chatting in : " + this.id)
-            //console.log(this.id)
-            
-            socket.emit('joinRoom', this.id)
-            
-            //socket.emit('getMessages', this.id)
-                
-        })
+    //Join Room
+    $(document).on('click','.chat', function(){
 
-    // $(document).on('click','.chat', function(){
-    //     $('#chatWindow').empty();
-    //     socket.leave(socket.rooms)[1]
-    //     socket.join(this.id)
-    //     console.log(socket.rooms)
-        
-    //     socket.emit('joinRoom', this.id)
-    //     //socket.emit('getMessages', this.id)
-            
-    // })
+        $('#chatWindow').empty();
+        $('#chatroomNameTop').text("Chatting in : " + this.id)       
+        socket.emit('joinRoom', this.id)  
+    })
 
-
+    //Receive Messages
     socket.on('receiveMessage', async function(msg) {
-        console.log(msg)
-        let user = await getUser();
-        //console.log(user)
 
+        try {
+            let user = await getUser();
             for(let x = 0; x < msg.length; x++){
-
                 if(msg[x].sender == user.name){
                     $('#chatWindow').append('<div class="messageContainer"><div class="message"><div class="sent">' + msg[x].sender+": " + msg[x].message + '</div></div></div>');
                 }
@@ -95,25 +79,23 @@ $(function() {
                     $('#chatWindow').append('<div class="messageContainer"><div class="message"><div class="received">' + msg[x].sender+": " + msg[x].message +  '</div></div></div>');
                 }
             }
+        } catch (error) {}
     })
 })
 
+    //Get Chats from route
     async function getChats(){
+
          try {
             let chats;
             await $.get("/chats", function(req, res){
-                //  chats = req;
-                chats = req   
-                //console.log(req)
-                
+                chats = req                   
               });
-
               return chats
 
-        } catch (error) { 
-            console.log(error);
-        }}
+        } catch (error) {}}
 
+    //Get User from route
     async function getUser(){
         let user = ''
 
@@ -122,11 +104,7 @@ $(function() {
                  user = userid;
               });
               return user;
-        } catch (error) { 
-            console.log(error);
-        }}
-
-
+        } catch (error) {}}
 
     //Send Message
     $('#send').on('click', async function() {
@@ -150,119 +128,108 @@ $(function() {
 
                 $('#message').val('')
                 socket.emit('sendMessage', msg);
-                $('#chatWindow').scrollTop = $('#chatWindow').scrollHeight//- $('#chatWindow').clientHeight
-
-            } catch (error) {
-                
-            }
-
+                $('#chatWindow').scrollTop = $('#chatWindow').scrollHeight
+            } catch (error) {}
         }
         else{
             $('#sendMessageNotification').text('Please enter a message')
         }
-
-
     })
-    
+
+    //Create Chatroom
     $('#submitCreateChat').on('click', async function() {
 
-        let user = await getUser();
-        let newChat = new Chat
-        newChat.user = user
-        newChat.name = $('#chatName').val();
 
-        if(!newChat.name == ''){
-            $('#createChatNotification').text('')
+        try {
+            let user = await getUser();
+            let newChat = new Chat
+            newChat.user = user
+            newChat.name = $('#chatName').val();
+    
+            if(!newChat.name == ''){
+                $('#createChatNotification').text('')
+                let chatFriendsList = [];
+                chatFriendsList.push(user.name)
+                $('input[type=checkbox]').each(function () {
+                if (this.checked){
+                    chatFriendsList.push($(this).attr('id'))
+                }
+            });
 
-        let chatFriendsList = [];
-        chatFriendsList.push(user.name)
-        $('input[type=checkbox]').each(function () {
-            if (this.checked){
-                chatFriendsList.push($(this).attr('id'))
+            newChat.members = chatFriendsList;
+            socket.emit('addChat', newChat);
             }
-            //chatFriendsList += (chatFriendsList=="" ? sThisVal : "," + sThisVal);
-        });
-        newChat.members = chatFriendsList;
-        socket.emit('addChat', newChat);
-        // chatModal.style.display = "none";
-        }
-        else{
-            $('#createChatNotification').text('Chat name cannot be empty')
-        
-        }
-       
-
+            else{
+                $('#createChatNotification').text('Chat name cannot be empty')
+            }
+        } catch (error) {}
     })
 
+    //Add Friend
     $('#submitAddFriend').on('click', async function() {
-        let user = await getUser();
-        let friend = $('#friend').val();
-        if (!friend == ''){
-            $('#addFriendNotification').text('')
-            socket.emit('addFriend', user.name, friend);
-            //friendModal.style.display = "none";
-         }
+
+        try {
+            let user = await getUser();
+            let friend = $('#friend').val();
+            if (!friend == ''){
+                $('#addFriendNotification').text('')
+                socket.emit('addFriend', user.name, friend);
+            }
             else{
                 $('#addFriendNotification').text('Friend name cannot be empty')
             }
-
+        } catch (error) {}
     })
 
 
     
     //Modals
 
-// Get the modal
-var chatModal = document.getElementById("createChatModal");
-var friendModal = document.getElementById("addFriendModal");
+    var chatModal = document.getElementById("createChatModal");
+    var friendModal = document.getElementById("addFriendModal");
+    var friendBtn = document.getElementById("addFriend");
+    var chatSpan = document.getElementsByClassName("close")[0];
+    var friendSpan = document.getElementsByClassName("close")[1];
 
 
-// Get the button that opens the modal
-var chatBtn = document.getElementById("createChat");
-var friendBtn = document.getElementById("addFriend");
+    //Open Create Chat Modal
+    $('#createChat').on('click',  async function() {
 
-// Get the <span> element that closes the modal
-var chatSpan = document.getElementsByClassName("close")[0];
-var friendSpan = document.getElementsByClassName("close")[1];
+        $('#friendsList').empty();
+        chatModal.style.display = "block";
 
-// When the user clicks the button, open the modal 
-
-$('#createChat').on('click',  async function() {
-    $('#friendsList').empty();
-    chatModal.style.display = "block";
-
-        
-    let user = await getUser();
-    for(let x = 0; x < user.friends.length; x++){
-         $('#friendsList').append('<div class="fChecklist"><input type="checkbox" id="' + user.friends[x] + '" name="' + user.friends[x] + '"><label for="' + user.friends[x] + '">' + user.friends[x] + '</label><br></div>')
-    } 
-    
-})
+        //Populate friends list
+        try {
+            let user = await getUser();
+            for(let x = 0; x < user.friends.length; x++){
+                $('#friendsList').append('<div class="fChecklist"><input type="checkbox" id="' + user.friends[x] + '" name="' + user.friends[x] + '"><label for="' + user.friends[x] + '">' + user.friends[x] + '</label><br></div>')
+            } 
+        } catch (error) {}  
+    })
 
 
-// }
-friendBtn.onclick = async function() {
-    $('#addFriendNotification').text('')
-    friendModal.style.display = "block";
-  }
+    friendBtn.onclick = function() {
+        $('#addFriendNotification').text('')
+        friendModal.style.display = "block";
+    }
 
-// When the user clicks on <span> (x), close the modal
-chatSpan.onclick = function() {
-    chatModal.style.display = "none";
-}
+    // When the user clicks on <span> (x), close the modal
+    chatSpan.onclick = function() {
+        chatModal.style.display = "none";
+    }
 
-friendSpan.onclick = function() {
-    friendModal.style.display = "none";
-}
+    friendSpan.onclick = function() {
+        friendModal.style.display = "none";
+    }
 
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function(event) {
-  if (event.target == chatModal) {
-    chatModal.style.display = "none";
-  }
-  if (event.target == friendModal) {
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+    if (event.target == chatModal) {
+        chatModal.style.display = "none";
+    }
+    if (event.target == friendModal) {
 
-    friendModal.style.display = "none";
-  }
-}
+        friendModal.style.display = "none";
+    }
+    }
 })
