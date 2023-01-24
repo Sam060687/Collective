@@ -1,5 +1,3 @@
-// const $ = require('jquery');
-
 $(function() {
 
 
@@ -237,4 +235,3 @@ $(function() {
     }
     }
 })
-

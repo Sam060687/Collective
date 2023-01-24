@@ -1,0 +1,21 @@
+// // const script = require('../public/js/script.js');
+// const $ = require('jquery');
+// const fs = require('fs');
+// const path = require('path');
+// const html = fs.readFileSync(path.resolve(__dirname, '../views/index.ejs'), 'utf8');
+
+// jest
+//     .dontMock('fs');
+
+// test('adds 1 + 2 to equal 3', async () => {
+//     let user = ''
+
+//         await $.get("/users", function(userid, status){
+//              user = userid;
+//           });
+          
+
+//     expect(user).toNotBe(null);
+//     }
+
+// );

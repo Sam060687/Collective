@@ -56,7 +56,7 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
     console.log('Connected to MongoDB');
 
     //Define database and collections
-    let dbo = db.db('test')
+    let dbo = db.db('collective')
     let chats = dbo.collection('chats');
     let users = dbo.collection('users');
     let sessions = dbo.collection('sessions');
@@ -255,6 +255,7 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
             });
         });
 
+
         //Add chat
         socket.on('addChat', async (chat) => {
 
@@ -268,6 +269,7 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
                         users.find({name: { $in: chat.members}}).toArray(function(err, result) {
                             if (err) throw err;
                             result.forEach(element => {
+                                io.to(socket.id).emit('chatAdded', "Chatroom added")
                                 io.to(element.socketId).emit('receiveChats', [chat])
                             });
                         });
@@ -322,10 +324,20 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
        catch (error) {}
     }
 
-          
-    server.listen(3001, () => {
-        console.log('Server is running on port 3001');
-      });
-      
+          try {
+            
+          } catch (error) {
+            
+          }
+          if (process.env.NODE_ENV !== 'test') {
+            server.listen(3001, () => console.log(`Listening on port 3001`)
+)}
+          else{
+            server.listen(3002, () => {
+                console.log('Server is running on port 3002');
+              });
+          }
+
 });
 
+module.exports = server

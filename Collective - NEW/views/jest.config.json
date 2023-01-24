@@ -1,0 +1,5 @@
+{
+    "preset": "@shelf/jest-mongodb",
+    "testRegex": "((\\.|/*.)(test))\\.js?$",
+    "moduleFileExtensions": ["js", "jsx", "ejs", "ejx"]
+}

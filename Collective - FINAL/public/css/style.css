@@ -1,72 +1,7 @@
-body {
-    margin: 0 !important;
-    background-color: hsl(177, 66%, 47%);
+body{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: rgb(103, 194, 194);
 }
-
-#container{
-    background-color: hsl(177, 66%, 47%);
-    display: grid;
-    height: 100vh;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-template-rows: 0.2fr 0.5fr 2fr 0.15fr ;
-    grid-template-areas:
-    "sidebarHeader mainHeader mainHeader mainHeader"
-    "sidebarUser chatWindow chatWindow chatWindow"
-    "sidebarChats chatWindow chatWindow chatWindow"
-    "sidebarChats chatActionsBar chatActionsBar chatActionsBar"
-}
-
-#mainHeader{
-    background-color: #22A39F;
-    grid-area: mainHeader;
-
-}
-
-#sidebarHeader{
-    background-color: #22A39F;
-    grid-area: sidebarHeader;
-
-}
-
-#sidebarUser{
-    background-color: #434242;
-    grid-area: sidebarUser;
-
-}
-
-#sidebarChats{
-    background-color: #434242;
-    grid-area: sidebarChats;
-    overflow: hidden;
-    position: relative;
-}
-
-#sidebarActionsBar{
-    background-color: #434242;
-    grid-area: sidebarActionsBar;
-
-}
-
-#chatHeader{
-    background-color: #85a51b;
-    grid-area: chatHeader;
-
-}
-
-#chatWindow{
-    padding: 4px;
-    background-color: #222222;
-    grid-area: chatWindow;
-    overflow: scroll;
-    overflow-x: hidden;
-}
-
-#chatActionsBar{
-    background-color: #22A39F;
-    grid-area: chatActionsBar;
-}
-
-
 ::-webkit-scrollbar {
     width: 10px;
     background-color: #fefefe;
@@ -103,7 +38,17 @@ body {
     border-radius: 3%;
 }
 
-
+.chatWindow{
+    max-height: 300px;
+    min-height: 300px;
+    max-width: 90%; 
+    width: 100%;
+    display: inline-block;
+    padding: 4px;
+    border: 1px solid rgb(26, 97, 97);
+    overflow: scroll;
+    overflow-x: hidden;
+}
 
 .messageContainer{
     color: #fefefe;
@@ -119,7 +64,7 @@ body {
     width: 10%;;
 }
 
-/* #chatList{
+#chatList{
     max-height: 300px;
     min-height: 300px;
     max-width: 90%;
@@ -129,7 +74,7 @@ body {
     border: 1px solid rgb(26, 97, 97);
     overflow: scroll;
     overflow-x: hidden;
-} */
+}
 
 .chatContainer{
     width: 100%;
@@ -257,17 +202,3 @@ body {
     from {opacity: 0} 
     to {opacity: 1}
   }
-
-  @media only screen and (max-width: 550px) {
-    #container{
-        grid-template-columns: 1fr;
-        grid-template-rows: 0.5fr 0.5fr 0.2fr 3fr 0.5fr 2fr;
-        grid-template-areas:
-        "sidebarHeader "
-        "mainHeader"
-        "sidebarUser"
-        "chatWindow"
-        "chatActionsBar"
-        "sidebarChats";
-    }
-}
