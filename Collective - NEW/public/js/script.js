@@ -36,7 +36,7 @@ $(function() {
         let chats = await getChats();
 
             for(let x = 0; x < chats.length; x++){
-                $('#chatList').append('<div class="chatContainer"><div class="chat" id="' + chats[x].name + '">' + chats[x].name + '</div></div>');
+                $('#sidebarChats').append('<div class="chatContainer"><div class="chat" id="' + chats[x].name + '">' + chats[x].name + '</div></div>');
             }
         } catch (error) {}
 
@@ -51,7 +51,7 @@ $(function() {
     //Add new chat to chat list
     socket.on('receiveChats', async function(chat) {
         
-        $('#chatList').prepend('<div class="chatContainer"><div class="chat" id="' + chat[0].name + '">' + chat[0].name + '</div></div>');
+        $('#sidebarChats').prepend('<div class="chatContainer"><div class="chat" id="' + chat[0].name + '">' + chat[0].name + '</div></div>');
     })
 
     //Notify user of result after adding a new chat
@@ -66,7 +66,7 @@ $(function() {
         $('#chatWindow').empty();
         $('.chat').removeClass('activeChat');
         $(this).addClass('activeChat');
-        $('#chatroomNameTop').text("Chatting in : " + this.id)       
+        $('#chatroomNameTop').text(this.id)       
         socket.emit('joinRoom', this.id)  
     })
 

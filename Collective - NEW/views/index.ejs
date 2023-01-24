@@ -17,18 +17,23 @@
 
 <div id="container">
 
-    <div id="mainHeader">header</div>
+    <div id="mainHeader"><span id="chatroomNameTop"></span></div>
     <div id="sidebarHeader">
-            <div>
-            <button id="createChat" class="showModal">Create Chat</button>
-            <button id="addFriend" class="showModal">Add Friend</button>
-            </div>
+            <form action="/logout" method="GET">
+                <button type="submit" id="logout">Logout</button>
+            </form>
         <br>
     </div>
 
-    <div id="sidebarUser">sidebarUser</div>
-    <div id="sidebarChats">sidebarChats</div>
-    <div id="chatWindow">chatWindow</div>
+    <div id="sidebarUser"><h3 class="text-center"><%= name %></h3></div>
+    <div id="sidebarChats"></div>
+    <div id="chatWindow"></div>
+    <div id="sidebarActionsBar">
+        <div>
+            <button id="createChat" class="showModal">Create Chat</button>
+            <button id="addFriend" class="showModal">Add Friend</button>
+        </div>
+    </div>
     <div id="chatActionsBar">
         <input type="text" id="message" placeholder="Type a message...">
         <button id="send">Send</button>
@@ -51,8 +56,12 @@
     <div class="modal-body">
         <br>
         <div>
-            <label for="chatName">Chat Name: </label>
+            <label for="chatName">Chat name: </label>
             <input type="text" id="chatName" placeholder="Please enter a chat name"></div>
+        <br>
+        <br>
+        Select friends
+        <br>
         <br>
         <div id="friendsList">
         </div>
