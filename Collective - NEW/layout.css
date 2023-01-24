@@ -1,0 +1,85 @@
+body {
+    margin: 0 !important;
+    background-color: hsl(177, 66%, 47%);
+}
+
+#container{
+    background-color: hsl(177, 66%, 47%);
+    display: grid;
+    height: 100vh;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 0.2fr 0.5fr 2fr 0.15fr ;
+    grid-template-areas:
+    "sidebarHeader mainHeader mainHeader mainHeader"
+    "sidebarUser chatWindow chatWindow chatWindow"
+    "sidebarChats chatWindow chatWindow chatWindow"
+    "sidebarChats chatActionsBar chatActionsBar chatActionsBar"
+}
+
+
+
+#mainHeader{
+    background-color: #22A39F;
+    grid-area: mainHeader;
+
+}
+
+#sidebarHeader{
+    background-color: #22A39F;
+    grid-area: sidebarHeader;
+
+}
+
+#sidebarUser{
+    background-color: #434242;
+    grid-area: sidebarUser;
+
+}
+
+#sidebarChats{
+    background-color: #434242;
+    grid-area: sidebarChats;
+    overflow: hidden;
+    position: relative;
+}
+
+#sidebarActionsBar{
+    background-color: #434242;
+    grid-area: sidebarActionsBar;
+
+}
+
+#chatHeader{
+    background-color: #85a51b;
+    grid-area: chatHeader;
+
+}
+
+#chatWindow{
+    background-color: #222222;
+    grid-area: chatWindow;
+
+}
+
+/* Chat Action Bar */
+
+#chatActionsBar{
+    background-color: #22A39F;
+    grid-area: chatActionsBar;
+}
+
+
+@media only screen and (max-width: 550px) {
+    #container{
+        grid-template-columns: 1fr;
+        grid-template-rows: 0.5fr 0.5fr 0.2fr 3fr 0.5fr 2fr;
+        grid-template-areas:
+        "sidebarHeader "
+        "mainHeader"
+        "sidebarUser"
+        "chatWindow"
+        "chatActionsBar"
+        "sidebarChats";
+    }
+}
+
