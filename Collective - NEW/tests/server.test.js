@@ -2,18 +2,8 @@
 const mongodb = require('mongodb').MongoClient;
 const express = require('express');
 const app = require ('../server.js');
-// const server = require("http").createServer(app);
 const supertest = require('supertest');
 
-
-// const io = require('socket.io')(server, {
-//     cors: {
-//         origin: "*",
-//         methods: ["GET", "POST"],
-//         transports: ['websocket', 'polling'],
-//         credentials: true
-//     },
-// });
 
 describe('insert', () => {
   let connection;
@@ -74,7 +64,6 @@ describe('insert', () => {
 });
 
 describe('testRoutes', () => {
-    //jest.setTimeout(30000);
     let connection;
     let db;
   
@@ -101,15 +90,14 @@ describe('testRoutes', () => {
         const users = db.collection('users');
         const insertedUser = await users.findOne({name: name});
         expect(insertedUser.name).toEqual(name);
-        
     }
     );
 
     it('should log the user in', async () => {
         const res = await supertest(app).post('/login').send({email: 'sam@sam', password: 'test'})
         expect(res.statusCode).toEqual(200)
-
       })
+});
 
     //   it('should return the root directory', async () => {
     //     const res = await supertest(app).get('/')
@@ -118,4 +106,3 @@ describe('testRoutes', () => {
     //   })
 
 
-});
