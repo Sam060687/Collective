@@ -17,12 +17,14 @@
 
 <div id="container">
 
-    <div id="mainHeader"><span id="chatroomNameTop"></span></div>
+    <div id="mainHeader"><span id="chatroomNameTop">
+
+
+    </span></div>
     <div id="sidebarHeader">
-            <form action="/logout" method="GET">
-                <button type="submit" id="logout">Logout</button>
-            </form>
-        <br>
+        <form action="/logout" method="GET">
+            <button type="submit" id="logout">Sign out</button>
+        </form>
     </div>
 
     <div id="sidebarUser"><h3 class="text-center"><%= name %></h3></div>

@@ -1,11 +1,11 @@
 body {
     margin: 0 !important;
-    background-color: hsl(177, 66%, 47%);
+    background-color: #1a6161;
     font-family: Helvetica Neue, Arial , sans-serif
 }
 
 #container{
-    background-color: hsl(177, 66%, 47%);
+    background-color: #434242;
     display: grid;
     height: 100vh;
     grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -15,6 +15,42 @@ body {
     "sidebarUser chatWindow chatWindow chatWindow"
     "sidebarChats chatWindow chatWindow chatWindow"
     "sidebarActionsBar chatActionsBar chatActionsBar chatActionsBar"
+}
+
+#loginRegisterContainer{
+    display: grid;
+    height: 100vh;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-areas:
+    "lrTop lrTop lrTop"
+    "lrLeft interface lrRight"
+    "lrBottom lrBottom lrBottom"
+}
+
+#interface{
+    
+    background-color: #206f6f;
+    padding: 20px;
+    border-radius: 3%;
+    grid-area: interface;
+    
+}
+
+#lrTop{
+    grid-area: lrTop;
+}
+
+#lrLeft{
+    grid-area: lrLeft;
+}
+
+#lrRight{
+    grid-area: lrRight;
+}
+
+#lrBottom{
+    grid-area: lrBottom;
 }
 
 #mainHeader{
@@ -76,6 +112,10 @@ body {
     background-color: #434242 !important;
 }
 
+#logout:hover{
+    background-color: #716d6d !important;
+}
+
 #addFriend{
     float: right;
     margin: 5px;
@@ -101,12 +141,12 @@ body {
     border-radius: 2px;
 }
 
-#loginCont{
+/* #loginCont{
     background-color: #1a6161;
     min-width: 25%;
     padding: 20px;
     border-radius: 3%;
-}
+} */
 
 
 .loginRegisterContainer {
@@ -162,7 +202,7 @@ button {
 
   button:hover{
     background-color: #35a7a7;
-
+    cursor: pointer;
   }
 
 .chatContainer{
@@ -291,14 +331,14 @@ button {
     to {opacity: 1}
   }
 
-  @media only screen and (max-width: 550px) {
+  @media only screen and (max-width: 650px) {
     #container{
         grid-template-columns: 1fr;
         grid-template-rows: 0.1fr 0.1fr 0.2fr 3fr 0.1fr 2fr 0.1fr;
         grid-template-areas:
         "sidebarHeader "
-        "mainHeader"
         "sidebarUser"
+        "mainHeader"
         "chatWindow"
         "chatActionsBar"
         "sidebarChats"
