@@ -4,9 +4,11 @@ if (process.env.NODE_ENV !== 'production') {
 
 //DB connection modules
 const mongodb = require('mongodb').MongoClient;
+
 const express = require('express');
 const app = express();
 const server = require("http").createServer(app);
+
 const bodyParser = require('body-parser');
 const ObjectId = require('mongodb').ObjectId;
 
@@ -27,8 +29,6 @@ const io = require('socket.io')(server, {
     },
 });
 
-
-
 app.set("socketio", io);
 app.set("view engine", "ejs");
 app.use(express.urlencoded({extended: false}));
@@ -38,10 +38,12 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
+
 app.use((req, res, next) => {
     req.io = io;
     return next();
   });
+
 app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
@@ -76,8 +78,8 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
             } else {
               return done(null, false, { message: 'Password incorrect' })
             }
-          } catch (e) {
-            return done(e)
+          } catch (error) {
+            return done(error)
           }
         }
 
@@ -260,13 +262,13 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         socket.on('addChat', async (chat) => {
 
             //Does the chat already exist?
-            chats.findOne({name: chat.name}, function(err, result) {
+            chats.findOne({name: chat.name}, async function(err, result) {
                 if (err) throw err;
                     if(result){
                         io.to(socket.id).emit('chatAdded', "Chatroom name already exists")
                     }else{
                         chats.insertOne({owner: chat.user.name, name: chat.name, members: chat.members})
-                        users.find({name: { $in: chat.members}}).toArray(function(err, result) {
+                        await users.find({name: { $in: chat.members}}).toArray(function(err, result) {
                             if (err) throw err;
                             result.forEach(element => {
                                 io.to(socket.id).emit('chatAdded', "Chatroom added")
