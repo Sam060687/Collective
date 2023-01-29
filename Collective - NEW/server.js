@@ -124,15 +124,24 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
 
     app.post('/register', checkUserNotAuthenticated, async (req, res) => {
 
-       try{
+        try{
             const hashedPassword = await bcrypt.hash(req.body.password, 10)
-            users.insertOne({name: req.body.username, email: req.body.email, password: hashedPassword, friends: []}, function(){
-                res.redirect('/login')
-            })
-        }catch(err){
-            res.redirect('/register')
-        }
+            users.findOne({email: req.body.email}, function(err, result) {
+                if (err) throw err;
+                    if(result){
+                        res.redirect('/register')
+                    }
+                    else{
+                        users.insertOne({name: req.body.username, email: req.body.email, password: hashedPassword, friends: []}, function(){
+                            res.redirect('/login')
+                        })
+                    }
+            });
+            }catch(err){
+                res.redirect('/register')
+            }
         });
+
 
     app.get('/users', async (req, res) => {
         
@@ -311,6 +320,13 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
         try {
             let result = await users.find({email: email}).toArray();
             return result[0];
+        } catch (error) {}
+
+      }
+
+      async function getSocketId(){
+        try {
+            return socket.id
         } catch (error) {}
 
       }
