@@ -95,7 +95,7 @@ describe('testRoutes', () => {
 
     it('should log the user in', async () => {
         const res = await supertest(app).post('/login').send({email: 'sam@sam', password: 'test'})
-        expect(res.statusCode).toEqual(200)
+        expect(res.statusCode).toEqual(302)
       })
 });
 

@@ -7,7 +7,7 @@
     "start": "nodemon server.js",
     "devStart": "nodemon -L server.js jest ",
     "test": "jest --config ./jest.config.json",
-    "test:watch": "npm run test -- --watchall"
+    "test:watch": "npm run test -- --watchAll"
   },
   "dependencies": {
     "bcrypt": "^5.1.0",

@@ -61,7 +61,7 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
     let dbo = db.db('collective')
     let chats = dbo.collection('chats');
     let users = dbo.collection('users');
-    let sessions = dbo.collection('sessions');
+    // let sessions = dbo.collection('sessions');
 
     //Passport functions    
     function initialize(passport) {
@@ -72,7 +72,7 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
             return done(null, false, { message: 'Account not found' })
           }
           try {
-              sessions.insertOne({user: user, socketId: io.socket})
+            //   sessions.insertOne({user: user, socketId: io.socket})
             if (await bcrypt.compare(password, user.password)) {
               return done(null, user)
             } else {
@@ -99,30 +99,30 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
 
     
     //API Routes
-    app.get('/', checkAuthenticated, async (req, res) => {
+    app.get('/', checkUserAuthenticated, async (req, res) => {
 
         let usr = await getUserById(req.session.passport.user)
         res.render("index", {name: usr})
 
         });
 
-    app.get('/login', checkNotAuthenticated, (req, res) => {
+    app.get('/login', checkUserNotAuthenticated, (req, res) => {
 
         res.render("login", {message: 'Please enter your email and password'})
         });
 
-    app.post('/login',checkNotAuthenticated, passport.authenticate('local', {failureRedirect: '/login', failureFlash: true}), function(req, res) {   
+    app.post('/login',checkUserNotAuthenticated, passport.authenticate('local', {failureRedirect: '/login', failureFlash: true}), function(req, res) {   
 
         res.render("index", {name: req.user.name})
         });
 
 
-    app.get('/register', checkNotAuthenticated, (req, res) => {
+    app.get('/register', checkUserNotAuthenticated, (req, res) => {
 
-        res.render("register.ejs")
+        res.render("register")
         });
 
-    app.post('/register', checkNotAuthenticated, async (req, res) => {
+    app.post('/register', checkUserNotAuthenticated, async (req, res) => {
 
        try{
             const hashedPassword = await bcrypt.hash(req.body.password, 10)
@@ -165,7 +165,7 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
 
       
     //Authentication check functions
-    function checkAuthenticated(req, res, next) {
+    function checkUserAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return next()
     }
@@ -173,7 +173,7 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
     res.redirect('/login')
     }
     
-    function checkNotAuthenticated(req, res, next) {
+    function checkUserNotAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return res.redirect('/')
     }
@@ -210,20 +210,21 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
             try {
                 users.updateOne({"name" : user.name }, {$set: {socketId: sid}})
             } catch (error) {}
-            
-            });
+        });
 
         //Join Chat
         socket.on('joinRoom', async function(room){
-            var rooms = await Array.from(socket.rooms);
-            socket.leave(rooms[1])
-            socket.join(room)
-
-            messages.find({roomName: room}).toArray(function(err, result) {
-                if (err) throw err;
-                io.to(socket.id).emit('receiveMessage', result)
-            });
-            })
+            try {
+                var rooms = await Array.from(socket.rooms);
+                socket.leave(rooms[1])
+                socket.join(room)
+    
+                messages.find({roomName: room}).toArray(function(err, result) {
+                    if (err) throw err;
+                    io.to(socket.id).emit('receiveMessage', result)
+                });
+            } catch (error) {}
+        })
 
         //Get Messages
         socket.on('getMessages', async (chat) => {
@@ -326,20 +327,15 @@ mongodb.connect('mongodb://localhost:27017', (err, db) => {
        catch (error) {}
     }
 
-          try {
+    try {
+    if (process.env.NODE_ENV !== 'test') {
+        server.listen(3001, () => console.log(`Server is running on port 3001`))
+        }
+        else {
+        server.listen(3002, () => console.log('Server is running on port 3002'))
             
-          } catch (error) {
-            
-          }
-          if (process.env.NODE_ENV !== 'test') {
-            server.listen(3001, () => console.log(`Listening on port 3001`)
-)}
-          else{
-            server.listen(3002, () => {
-                console.log('Server is running on port 3002');
-              });
-          }
-
+        }
+    } catch (error) {}
 });
 
 module.exports = server
