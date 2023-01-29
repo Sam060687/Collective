@@ -54,6 +54,11 @@ $(function() {
         $('#sidebarChats').prepend('<div class="chatContainer"><div class="chat" id="' + chat[0].name + '">' + chat[0].name + '</div></div>');
     })
 
+    socket.on('registerFailed', async function(msg) {
+        $('#registerNotification').text(msg)
+    })
+    
+
     //Notify user of result after adding a new chat
     socket.on('chatAdded', async function(msg) {
 
